@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Learning.Repository.Migrations
 {
     [DbContext(typeof(ELearningDbContext))]
-    [Migration("20260309211933_InitialCreate")]
+    [Migration("20260309090836_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
