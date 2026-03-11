@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace E_Learning.Service.DTOs.LessonDto
+namespace E_Learning.Service.DTOs.Lesson
 {
-    public class LessonDto
+    public class CreateLessonDto
     {
-        public int Id { get; set; }
-
         public int SectionId { get; set; }
 
         public string Title { get; set; } = string.Empty;

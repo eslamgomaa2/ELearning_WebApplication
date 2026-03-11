@@ -1,5 +1,6 @@
 ﻿using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Courses;
+using E_Learning.Service.DTOs.Course;
 using E_Learning.Service.DTOs.CourseDto;
 using System;
 using System.Collections.Generic;

@@ -3,13 +3,9 @@ using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Courses;
 using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Services.Courses;
+using E_Learning.Service.DTOs.Course;
 using E_Learning.Service.DTOs.CourseDto;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Learning.Service.Services.Courses
 {

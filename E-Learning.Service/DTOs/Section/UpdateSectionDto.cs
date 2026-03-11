@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace E_Learning.Service.DTOs.SectionDto
+namespace E_Learning.Service.DTOs.Section
 {
-    public class CreateSectionDto
+    public class UpdateSectionDto
     {
-        public int CourseId { get; set; }
-
         public string Title { get; set; } = string.Empty;
         public int OrderIndex { get; set; }
     }

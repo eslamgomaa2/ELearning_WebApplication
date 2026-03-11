@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace E_Learning.Service.DTOs.LessonDto
+namespace E_Learning.Service.DTOs.Lesson
 {
-    public class CreateLessonDto
+    public class UpdateLessonDto
     {
-        public int SectionId { get; set; }
-
         public string Title { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
 
@@ -22,3 +20,4 @@ namespace E_Learning.Service.DTOs.LessonDto
         public bool IsFreePreview { get; set; }
     }
 }
+

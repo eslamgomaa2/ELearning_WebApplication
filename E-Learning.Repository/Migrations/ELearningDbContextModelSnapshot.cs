@@ -1100,6 +1100,9 @@ namespace E_Learning.Repository.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CourseId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1116,6 +1119,8 @@ namespace E_Learning.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("CourseId1");
 
                     b.ToTable("Sections", (string)null);
                 });
@@ -2589,6 +2594,10 @@ namespace E_Learning.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("E_Learning.Core.Entities.Courses.Course", null)
+                        .WithMany("Sections")
+                        .HasForeignKey("CourseId1");
+
                     b.Navigation("Course");
                 });
 
@@ -2976,6 +2985,11 @@ namespace E_Learning.Repository.Migrations
             modelBuilder.Entity("E_Learning.Core.Entities.Billing.PayoutRequest", b =>
                 {
                     b.Navigation("PayoutApproval");
+                });
+
+            modelBuilder.Entity("E_Learning.Core.Entities.Courses.Course", b =>
+                {
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("E_Learning.Core.Entities.Courses.Section", b =>

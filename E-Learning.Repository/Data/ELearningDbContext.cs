@@ -28,9 +28,9 @@ namespace E_Learning.Repository.Data
 
         private readonly AuditInterceptor _auditInterceptor;
 
-        public ELearningDbContext(DbContextOptions<ELearningDbContext> options, AuditInterceptor auditInterceptor) : base(options)
+        public ELearningDbContext(DbContextOptions<ELearningDbContext> options, AuditInterceptor? auditInterceptor = null) : base(options)
         {
-            _auditInterceptor = auditInterceptor;
+            _auditInterceptor = auditInterceptor!;
         }
 
         // ─── Identity ────────────────────────────
@@ -131,12 +131,11 @@ namespace E_Learning.Repository.Data
 
 
         // ─── OnConfiguring ───────────────────────
-        protected override void OnConfiguring(
-            DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.AddInterceptors(_auditInterceptor);
+            if (_auditInterceptor != null)
+                optionsBuilder.AddInterceptors(_auditInterceptor);
         }
-
 
     }
 }

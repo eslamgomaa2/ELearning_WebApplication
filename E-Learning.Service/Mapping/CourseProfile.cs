@@ -1,13 +1,9 @@
 ﻿using AutoMapper;
 using E_Learning.Core.Entities.Courses;
+using E_Learning.Service.DTOs.Course;
 using E_Learning.Service.DTOs.CourseDto;
-using E_Learning.Service.DTOs.LessonDto;
-using E_Learning.Service.DTOs.SectionDto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using E_Learning.Service.DTOs.Lesson;
+using E_Learning.Service.DTOs.Section;
 
 
 
