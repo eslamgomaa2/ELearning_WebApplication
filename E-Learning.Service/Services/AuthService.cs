@@ -266,7 +266,7 @@ public class AuthService : IAuthService
                 UserName = payload.Email,
                 Email = payload.Email,
                 EmailConfirmed = true, // Google already verified
-                ProfilePicture = payload.Picture,
+            //    ProfilePicture = payload.Picture,
                 MemberSince = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 IsActive = true,
@@ -326,7 +326,7 @@ public class AuthService : IAuthService
                 Id = user.Id.ToString(),
                 FullName = user.FullName,
                 Email = user.Email!,
-                ProfilePicture = user.ProfilePicture,
+              //  ProfilePicture = user.ProfilePicture,
                 Roles = roles.ToList()
             }
         };
