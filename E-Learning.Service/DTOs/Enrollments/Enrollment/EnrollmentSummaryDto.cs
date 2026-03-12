@@ -1,9 +1,8 @@
 ﻿using E_Learning.Core.Enums;
-using E_Learning.Service.DTOs.Enrollments.LessonProgress;
 
 namespace E_Learning.Service.DTOs.Enrollments.Enrollment
 {
-    public class EnrollmentResponseDto
+    public class EnrollmentSummaryDto
     {
         public int Id { get; set; }
         public Guid StudentId { get; set; }
@@ -16,7 +15,5 @@ namespace E_Learning.Service.DTOs.Enrollments.Enrollment
         public DateTime EnrolledAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public bool IsDeleted { get; set; }
-        public IReadOnlyList<LessonProgressSummaryDto> LessonProgresses { get; set; }
-            = new List<LessonProgressSummaryDto>();
     }
 }

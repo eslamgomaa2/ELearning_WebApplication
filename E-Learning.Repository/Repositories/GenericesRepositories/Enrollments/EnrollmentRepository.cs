@@ -14,19 +14,23 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
             _context = context;
         }
 
+        private IQueryable<Enrollment> WithFullIncludes()
+        {
+            return _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course);
+        }
+
+
         public async Task<Enrollment?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
+            return await WithFullIncludes()
                 .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, ct);
         }
 
         public async Task<IReadOnlyList<Enrollment>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
+            return await WithFullIncludes()
                 .Where(e => !e.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -34,8 +38,7 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
 
         public async Task<IReadOnlyList<Enrollment>> GetByStudentIdAsync(Guid studentId, CancellationToken ct = default)
         {
-            return await _context.Enrollments
-                .Include(e => e.Course)
+            return await WithFullIncludes()
                 .Where(e => e.StudentId == studentId && !e.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -43,8 +46,7 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
 
         public async Task<IReadOnlyList<Enrollment>> GetByCourseIdAsync(int courseId, CancellationToken ct = default)
         {
-            return await _context.Enrollments
-                .Include(e => e.Student)
+            return await WithFullIncludes()
                 .Where(e => e.CourseId == courseId && !e.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -55,6 +57,7 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
             return await _context.Enrollments
                 .AnyAsync(e => e.StudentId == studentId && e.CourseId == courseId && !e.IsDeleted, ct);
         }
+
 
         public async Task AddAsync(Enrollment enrollment, CancellationToken ct = default)
         {

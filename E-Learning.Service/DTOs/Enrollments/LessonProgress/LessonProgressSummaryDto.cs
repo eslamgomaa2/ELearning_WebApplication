@@ -1,13 +1,10 @@
 ﻿using E_Learning.Core.Enums;
-using E_Learning.Service.DTOs.Enrollments.Enrollment;
 
 namespace E_Learning.Service.DTOs.Enrollments.LessonProgress
 {
-    public class LessonProgressResponseDto
+    public class LessonProgressSummaryDto
     {
         public int Id { get; set; }
-        public int EnrollmentId { get; set; }
-        public EnrollmentSummaryDto Enrollment { get; set; } = null!;
         public int LessonId { get; set; }
         public LessonSummaryDto Lesson { get; set; } = null!;
         public LessonProgressStatus Status { get; set; }

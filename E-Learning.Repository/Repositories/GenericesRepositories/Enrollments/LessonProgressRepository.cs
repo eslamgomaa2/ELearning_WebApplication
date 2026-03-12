@@ -14,19 +14,26 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
             _context = context;
         }
 
+        private IQueryable<LessonProgress> WithFullIncludes()
+        {
+            return _context.LessonProgresses
+                .Include(lp => lp.Lesson)
+                .Include(lp => lp.Enrollment)
+                    .ThenInclude(e => e.Student)
+                .Include(lp => lp.Enrollment)
+                    .ThenInclude(e => e.Course);
+        }
+
 
         public async Task<LessonProgress?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _context.LessonProgresses
-                .Include(lp => lp.Lesson)
-                .Include(lp => lp.Enrollment)
+            return await WithFullIncludes()
                 .FirstOrDefaultAsync(lp => lp.Id == id, ct);
         }
 
         public async Task<IReadOnlyList<LessonProgress>> GetByEnrollmentIdAsync(int enrollmentId, CancellationToken ct = default)
         {
-            return await _context.LessonProgresses
-                .Include(lp => lp.Lesson)
+            return await WithFullIncludes()
                 .Where(lp => lp.EnrollmentId == enrollmentId)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -34,8 +41,7 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
 
         public async Task<LessonProgress?> GetByEnrollmentAndLessonAsync(int enrollmentId, int lessonId, CancellationToken ct = default)
         {
-            return await _context.LessonProgresses
-                .Include(lp => lp.Lesson)
+            return await WithFullIncludes()
                 .FirstOrDefaultAsync(lp => lp.EnrollmentId == enrollmentId && lp.LessonId == lessonId, ct);
         }
 

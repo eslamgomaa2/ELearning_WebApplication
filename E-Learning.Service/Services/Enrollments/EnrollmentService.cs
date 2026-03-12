@@ -26,7 +26,8 @@ namespace E_Learning.Service.Services.Enrollments
             var enrollment = await _uow.Enrollments.GetByIdAsync(id, ct);
 
             if (enrollment is null)
-                return _responseHandler.NotFound<EnrollmentResponseDto>($"Enrollment with ID {id} was not found.");
+                return _responseHandler.NotFound<EnrollmentResponseDto>(
+                    $"Enrollment with ID {id} was not found.");
 
             return _responseHandler.Success(_mapper.Map<EnrollmentResponseDto>(enrollment));
         }
@@ -112,7 +113,8 @@ namespace E_Learning.Service.Services.Enrollments
             _uow.Enrollments.Update(enrollment);
             await _uow.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(_mapper.Map<EnrollmentResponseDto>(enrollment));
+            var updated = await _uow.Enrollments.GetByIdAsync(id, ct);
+            return _responseHandler.Success(_mapper.Map<EnrollmentResponseDto>(updated!));
         }
 
 
@@ -122,7 +124,8 @@ namespace E_Learning.Service.Services.Enrollments
             var enrollment = await _uow.Enrollments.GetByIdAsync(id, ct);
 
             if (enrollment is null)
-                return _responseHandler.NotFound<string>($"Enrollment with ID {id} was not found.");
+                return _responseHandler.NotFound<string>(
+                    $"Enrollment with ID {id} was not found.");
 
             _uow.Enrollments.SoftDelete(enrollment, deletedBy);
             await _uow.SaveChangesAsync(ct);

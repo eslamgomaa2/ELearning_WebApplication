@@ -34,6 +34,7 @@ namespace E_Learning.Service.Services.Enrollments
             return _responseHandler.Success(_mapper.Map<LessonProgressResponseDto>(progress));
         }
 
+
         public async Task<Response<IReadOnlyList<LessonProgressResponseDto>>> GetByEnrollmentIdAsync(
             int enrollmentId, CancellationToken ct = default)
         {
@@ -125,7 +126,8 @@ namespace E_Learning.Service.Services.Enrollments
             _uow.LessonProgresses.Update(progress);
             await _uow.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(_mapper.Map<LessonProgressResponseDto>(progress));
+            var updated = await _uow.LessonProgresses.GetByIdAsync(id, ct);
+            return _responseHandler.Success(_mapper.Map<LessonProgressResponseDto>(updated!));
         }
 
 
