@@ -2,9 +2,18 @@
 using E_learning.API.Extensions;
 using E_learning.Core.Entities.Identity;
 using E_learning.Repository.Interceptors;
+using E_Learning.Core.Base;
+using E_Learning.Core.Interfaces.Repositories.Enrollments;
+using E_Learning.Core.Interfaces.Repositories.LiveSessions;
+using E_Learning.Service.Services.LiveSessionServices;
+using E_Learning.Core.Repository;
 using E_Learning.Repository.Data;
+using E_Learning.Repository.Repositories;
+using E_Learning.Repository.Repositories.GenericesRepositories.Enrollments;
+using E_Learning.Service.Mapping;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 
 namespace E_Learning.API
 {
@@ -14,13 +23,9 @@ namespace E_Learning.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // For Auditing Interceptor
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<AuditInterceptor>();
 
-
-
-            // DbContext Default
             builder.Services.AddDbContext<ELearningDbContext>((serviceProvider, options) =>
             {
                 var interceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
@@ -33,21 +38,30 @@ namespace E_Learning.API
                        .AddInterceptors(interceptor);
             });
 
-
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ELearningDbContext>().AddDefaultTokenProviders();
 
-            // Add services to the container.
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+           // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
+            
+            builder.Services.AddTransient<ResponseHandler>();
+
+            builder.Services.AddScoped<ILiveSessionService, LiveSessionService>();
+            builder.Services.AddScoped<ILiveSessionAttendeeService, LiveSessionAttendeeService>();
+            
+            builder.Services.AddScoped<ILiveSessionRepository, LiveSessionRepository>();
+            builder.Services.AddScoped<ILiveSessionAttendeeRepository, LiveSessionAttendeeRepository>();
+
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
-            // ─── Migration & Seeding ─────────────────────
+
             await app.MigrateDatabaseAsync();
-            // Configure the HTTP request pipeline.
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -55,13 +69,11 @@ namespace E_Learning.API
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
         }
     }
 }
+

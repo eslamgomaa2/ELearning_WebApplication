@@ -30,7 +30,7 @@ namespace E_Learning.Core.Entities.LiveSessions
         public LiveSessionStatus Status { get; set; }
             = LiveSessionStatus.Scheduled;
 
-        //public ICollection<LiveSessionAttendee> Attendees { get; set; }
-        //    = new List<LiveSessionAttendee>();
+        public ICollection<LiveSessionAttendee> Attendees { get; set; }
+           = new List<LiveSessionAttendee>();
     }
 }
