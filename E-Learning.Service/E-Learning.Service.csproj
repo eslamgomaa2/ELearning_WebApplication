@@ -16,4 +16,8 @@
     <ProjectReference Include="..\E-Learning.Core\E-Learning.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.0" />
+  </ItemGroup>
+
 </Project>

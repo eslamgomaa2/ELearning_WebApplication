@@ -5,6 +5,20 @@ using E_learning.Repository.Interceptors;
 using E_Learning.Core.Base;
 using E_Learning.Core.Interfaces.Repositories.Assessments.Assignments;
 using E_Learning.Core.Interfaces.Repositories.Enrollments;
+using E_Learning.Core.Interfaces.Repositories.LiveSessions;
+using E_Learning.Service.Services.LiveSessionServices;
+using E_Learning.Core.Repository;
+using E_Learning.Repository.Data;
+using E_Learning.Repository.Repositories;
+using E_Learning.Repository.Repositories.GenericesRepositories.Enrollments;
+using E_Learning.Service.Mapping;
+using E_Learning.core.Interfaces.Repositories.Courses;
+using E_Learning.Core.Interfaces.Services.Courses;
+using E_Learning.Repository.Data;
+using E_Learning.Repository.Repositories.GenericesRepositories.Courses;
+using E_Learning.Service.Services.Courses;
+using E_Learning.Core.Base;
+using E_Learning.Core.Interfaces.Repositories.Enrollments;
 using E_Learning.Core.Interfaces.Services.Enrollments;
 using E_Learning.Core.Repository;
 using E_Learning.Repository.Data;
@@ -20,6 +34,7 @@ using E_Learning.Service.Services.Enrollments;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 
 namespace E_Learning.API
 {
@@ -29,13 +44,9 @@ namespace E_Learning.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // For Auditing Interceptor
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<AuditInterceptor>();
 
-
-
-            // DbContext Default
             builder.Services.AddDbContext<ELearningDbContext>((serviceProvider, options) =>
             {
                 var interceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
@@ -48,12 +59,20 @@ namespace E_Learning.API
                        .AddInterceptors(interceptor);
             });
 
-
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ELearningDbContext>().AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+           // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
+            
+            builder.Services.AddTransient<ResponseHandler>();
+
+            builder.Services.AddScoped<ILiveSessionService, LiveSessionService>();
+            builder.Services.AddScoped<ILiveSessionAttendeeService, LiveSessionAttendeeService>();
+            
+            builder.Services.AddScoped<ILiveSessionRepository, LiveSessionRepository>();
+            builder.Services.AddScoped<ILiveSessionAttendeeRepository, LiveSessionAttendeeRepository>();
             // Auto Mapper
             builder.Services.AddAutoMapper(typeof(EnrollmentMappingProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(AssignmentProfile).Assembly);
@@ -73,16 +92,17 @@ namespace E_Learning.API
             builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
             builder.Services.AddScoped<IAssignmentSubmissionRepository, AssignmentSubmissionRepository>();
             // Add services to the container.
+            builder.Services.AddScoped<ICourseService, CourseService>();
+
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
-            // ─── Migration & Seeding ─────────────────────
+
             await app.MigrateDatabaseAsync();
-            // Configure the HTTP request pipeline.
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -90,7 +110,6 @@ namespace E_Learning.API
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
             app.UseStaticFiles();
 
@@ -100,3 +119,4 @@ namespace E_Learning.API
         }
     }
 }
+

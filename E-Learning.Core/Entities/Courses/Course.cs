@@ -41,5 +41,7 @@ namespace E_Learning.Core.Entities.Courses
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
 
+        public ICollection<Section> Sections { get; set; } = new List<Section>();
+
     }
 }
