@@ -1,6 +1,8 @@
-﻿namespace E_Learning.Core.Interfaces.Repositories.Assessments.Assignments
+﻿using E_Learning.Core.Entities.Assessments.Assignments;
+
+namespace E_Learning.Core.Interfaces.Repositories.Assessments.Assignments
 {
-    public interface IAssignmentRepository
+    public interface IAssignmentRepository : IGenericRepository<Assignment, int>
     {
     }
 }

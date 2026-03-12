@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace E_Learning.Core.Base
 {
@@ -75,6 +76,22 @@ namespace E_Learning.Core.Base
                 HttpStatusCode = System.Net.HttpStatusCode.Created,
                 Succeeded = true,
                 Message = "Created Sucessfully"
+            };
+        }
+
+        public   Response<T> HandleModelStateErrors<T>(ModelStateDictionary modelState)
+        {
+            var errors = modelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .SelectMany(x => x.Value.Errors.Select(e => $"{x.Key}: {e.ErrorMessage}"))
+                .ToList();
+
+            return new Response<T>()
+            {
+                HttpStatusCode = System.Net.HttpStatusCode.BadRequest,
+                Succeeded = false,
+                Errors = errors,
+                Message = "Validation Failed"
             };
         }
     }
