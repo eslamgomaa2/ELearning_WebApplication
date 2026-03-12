@@ -2,6 +2,10 @@
 using E_learning.API.Extensions;
 using E_learning.Core.Entities.Identity;
 using E_learning.Repository.Interceptors;
+using E_Learning.API.Extensions;
+using E_Learning.API.Middleware;
+using E_Learning.Repository.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using E_Learning.Core.Base;
 using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Assessments.Assignments;
@@ -26,6 +30,8 @@ using E_Learning.Service.Services.Enrollments;
 using E_Learning.Service.Services.LiveSessionServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace E_Learning.API
 {
@@ -53,6 +59,9 @@ namespace E_Learning.API
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<ELearningDbContext>().AddDefaultTokenProviders();
 
+            // Auth
+            builder.Services.AddApplicationServices(builder.Configuration);
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
@@ -100,8 +109,9 @@ namespace E_Learning.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseStaticFiles();
 

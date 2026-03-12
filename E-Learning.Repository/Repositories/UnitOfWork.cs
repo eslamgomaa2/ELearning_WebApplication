@@ -19,7 +19,6 @@ using E_Learning.Repository.Repositories.GenericesRepositories.AdminOperations;
 using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Assignments;
 using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Exams;
 using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Quizzes;
-using E_Learning.Repository.Repositories.GenericesRepositories.Authentications;
 using E_Learning.Repository.Repositories.GenericesRepositories.Courses;
 using E_Learning.Repository.Repositories.GenericesRepositories.Enrollments;
 using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;

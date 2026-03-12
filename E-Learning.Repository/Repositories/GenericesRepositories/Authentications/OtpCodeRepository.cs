@@ -1,15 +1,18 @@
 ﻿using E_Learning.core.Interfaces.Repositories.Authentications;
+using E_Learning.Core.Entities.Identity;
 using E_Learning.Repository.Data;
+using E_Learning.Repository.Repositories.GenericesRepositories;
 
-namespace E_Learning.Repository.Repositories.GenericesRepositories.Authentications
+public class OtpCodeRepository : GenericRepository<OtpCode, int>, IOtpCodeRepository
 {
-    public class OtpCodeRepository : IOtpCodeRepository
-    {
-        public OtpCodeRepository(ELearningDbContext context)
-        {
-            Context = context;
-        }
+    public OtpCodeRepository(ELearningDbContext context) : base(context) { }
 
-        public ELearningDbContext Context { get; }
-    }
+    public Task<OtpCode?> GetValidOtpAsync(
+        Guid userId, string code, string purpose, CancellationToken ct = default)
+        => FirstOrDefaultAsync(o =>
+            o.UserId == userId &&
+            o.Code == code &&
+            o.Purpose == purpose &&
+            !o.IsUsed &&
+            o.ExpiresAt > DateTime.UtcNow, ct);
 }

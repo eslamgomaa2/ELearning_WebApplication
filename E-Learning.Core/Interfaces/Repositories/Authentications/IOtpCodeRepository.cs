@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using E_Learning.Core.Entities.Identity;
+using E_Learning.Core.Interfaces.Repositories;
 
-namespace E_Learning.core.Interfaces.Repositories.Authentications
+namespace E_Learning.core.Interfaces.Repositories.Authentications;
+
+public interface IOtpCodeRepository : IGenericRepository<OtpCode, int>
 {
-    public interface IOtpCodeRepository
-    {
-    }
+    Task<OtpCode?> GetValidOtpAsync(
+        Guid userId,
+        string code,
+        string purpose,
+        CancellationToken ct = default);
 }

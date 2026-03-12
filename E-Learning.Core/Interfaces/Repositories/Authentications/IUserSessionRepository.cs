@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using E_Learning.Core.Entities.Identity;
+using E_Learning.Core.Interfaces.Repositories;
 
-namespace E_Learning.core.Interfaces.Repositories.Authentications
+namespace E_Learning.core.Interfaces.Repositories.Authentications;
+
+public interface IUserSessionRepository : IGenericRepository<UserSession, int>
 {
-    public interface IUserSessionRepository
-    {
-    }
+    Task<UserSession?> GetActiveSessionByTokenAsync(
+        string refreshToken,
+        CancellationToken ct = default);
+
+    Task RevokeAllUserSessionsAsync(
+        Guid userId,
+        CancellationToken ct = default);
 }
