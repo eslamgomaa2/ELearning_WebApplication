@@ -882,7 +882,8 @@ namespace E_Learning.Repository.Migrations
                     CourseId = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     OrderIndex = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CourseId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -893,6 +894,11 @@ namespace E_Learning.Repository.Migrations
                         principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Sections_Courses_CourseId1",
+                        column: x => x.CourseId1,
+                        principalTable: "Courses",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1002,7 +1008,8 @@ namespace E_Learning.Repository.Migrations
                     StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     LeftAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DurationSeconds = table.Column<int>(type: "int", nullable: true)
+                    DurationSeconds = table.Column<int>(type: "int", nullable: true),
+                    LiveSessionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1013,6 +1020,11 @@ namespace E_Learning.Repository.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_LiveSessionAttendees_LiveSessions_LiveSessionId",
+                        column: x => x.LiveSessionId,
+                        principalTable: "LiveSessions",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_LiveSessionAttendees_LiveSessions_SessionId",
                         column: x => x.SessionId,
@@ -1587,6 +1599,11 @@ namespace E_Learning.Repository.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_LiveSessionAttendees_LiveSessionId",
+                table: "LiveSessionAttendees",
+                column: "LiveSessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LiveSessionAttendees_StudentId",
                 table: "LiveSessionAttendees",
                 column: "StudentId");
@@ -1718,6 +1735,11 @@ namespace E_Learning.Repository.Migrations
                 name: "IX_Sections_CourseId",
                 table: "Sections",
                 column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sections_CourseId1",
+                table: "Sections",
+                column: "CourseId1");
 
             migrationBuilder.CreateIndex(
                 name: "UQ_Stage_Name",
