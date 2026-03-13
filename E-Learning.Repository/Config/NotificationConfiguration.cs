@@ -28,6 +28,10 @@ public class NotificationConfiguration
         builder.Property(n => n.CreatedAt)
                .HasDefaultValueSql("GETUTCDATE()");
 
-        
+        builder.HasOne(n => n.User)
+               .WithMany(u => u.Notifications);
+
+
+
     }
 }

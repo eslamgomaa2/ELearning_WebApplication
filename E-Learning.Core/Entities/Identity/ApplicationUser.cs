@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using E_Learning.Core.Entities.Notifications;
+using Microsoft.AspNetCore.Identity;
 
 namespace E_learning.Core.Entities.Identity
 {
@@ -21,6 +22,11 @@ namespace E_learning.Core.Entities.Identity
         // ─── Privacy ─────────────────────────────
         public bool ProfileVisibility { get; set; } = true;
         public bool ShowProgressToOthers { get; set; } = true;
+
+        // ─── NavProp ─────────────────────────────
+        public ICollection<Notification>? Notifications;
+        public NotificationSetting? NotificationSetting;
+
 
     }
 }
