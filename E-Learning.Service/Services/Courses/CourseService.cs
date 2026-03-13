@@ -3,6 +3,7 @@ using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Courses;
 using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Services.Courses;
+using E_Learning.Core.Repository;
 using E_Learning.Repository.Repositories;
 using E_Learning.Service.DTOs.Course;
 using E_Learning.Service.DTOs.CourseDto;
@@ -15,12 +16,12 @@ namespace E_Learning.Service.Services.Courses
         
         private readonly IMapper _mapper;
         private  ResponseHandler _response;
-        private readonly UnitOfWork _unit;
+        private readonly IUnitOfWork _unit;
 
         public CourseService( 
             IMapper mapper,
             ResponseHandler response,
-            UnitOfWork unit
+            IUnitOfWork unit
             )
         {            
             _mapper = mapper;
