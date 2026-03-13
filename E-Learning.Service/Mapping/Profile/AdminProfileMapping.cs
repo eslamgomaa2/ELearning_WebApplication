@@ -1,12 +1,15 @@
-﻿/*using System;
+﻿using E_Learning.Core.Entities.Profiles;
+using E_Learning.Service.DTOs.Profiles.Admin;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace E_Learning.Service.Mapping.Profile
 {
-    public class AdminProfileMapping:Profile
+    public class AdminProfileMapping : Profile
     {
         public AdminProfileMapping()
         {
@@ -18,4 +21,3 @@ namespace E_Learning.Service.Mapping.Profile
         }
     }
 }
-*/
