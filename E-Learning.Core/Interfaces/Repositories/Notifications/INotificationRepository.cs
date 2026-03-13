@@ -10,7 +10,7 @@ namespace E_Learning.Core.Interfaces.Repositories.Notifications
 
         Task<int> GetUnreadCountAsync(Guid userId);
 
-        Task<Notification?> GetByIdForUserAsync(Guid notificationId, Guid userId);
+        Task<Notification?> GetByIdForUserAsync(int notificationId, Guid userId);
 
         Task<int> MarkAllAsReadAsync(Guid userId);
     }
