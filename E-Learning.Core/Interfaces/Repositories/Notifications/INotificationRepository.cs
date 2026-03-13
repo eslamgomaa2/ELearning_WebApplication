@@ -13,5 +13,6 @@ namespace E_Learning.Core.Interfaces.Repositories.Notifications
         Task<Notification?> GetByIdForUserAsync(int notificationId, Guid userId);
 
         Task<int> MarkAllAsReadAsync(Guid userId);
+        Task GetByIdAsync(int notificationId);
     }
 }

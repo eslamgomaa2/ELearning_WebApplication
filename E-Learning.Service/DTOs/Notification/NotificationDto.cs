@@ -8,7 +8,7 @@ namespace E_Learning.Service.DTOs.Notification
 {
     public class NotificationDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; } = "";
         public string Body { get; set; } = "";
         public string Type { get; set; } = "";
