@@ -19,50 +19,51 @@ namespace E_Learning.API.Controllers
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var response = await _enrollmentService.GetAllAsync(ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
             var response = await _enrollmentService.GetByIdAsync(id, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
-        [HttpGet("student/{studentId:guid}")]
+        [HttpGet("SearchByStudent/{studentId:guid}")]
         public async Task<IActionResult> GetByStudent(Guid studentId, CancellationToken ct)
         {
             var response = await _enrollmentService.GetByStudentIdAsync(studentId, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
-        [HttpGet("course/{courseId:int}")]
+        [HttpGet("SearchByCourse/{courseId:int}")]
         public async Task<IActionResult> GetByCourse(int courseId, CancellationToken ct)
         {
             var response = await _enrollmentService.GetByCourseIdAsync(courseId, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateEnrollmentDto dto, CancellationToken ct)
         {
             var response = await _enrollmentService.CreateAsync(dto, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateEnrollmentDto dto, CancellationToken ct)
         {
             var response = await _enrollmentService.UpdateAsync(id, dto, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
 
+        // DELETE /api/enrollments/{id}
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var deletedBy = User.Identity?.Name ?? "system";
             var response = await _enrollmentService.SoftDeleteAsync(id, deletedBy, ct);
-            return Ok(response);
+            return StatusCode((int)response.HttpStatusCode, response);
         }
     }
 }

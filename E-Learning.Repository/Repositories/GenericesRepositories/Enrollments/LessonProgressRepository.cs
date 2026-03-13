@@ -21,7 +21,9 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
                 .Include(lp => lp.Enrollment)
                     .ThenInclude(e => e.Student)
                 .Include(lp => lp.Enrollment)
-                    .ThenInclude(e => e.Course);
+                    .ThenInclude(e => e.Course)
+                .Include(lp => lp.Enrollment)
+                    .ThenInclude(e => e.Transaction);
         }
 
 
