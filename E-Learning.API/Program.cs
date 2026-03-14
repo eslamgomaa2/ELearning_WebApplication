@@ -2,8 +2,7 @@
 using E_learning.API.Extensions;
 using E_learning.Core.Entities.Identity;
 using E_learning.Repository.Interceptors;
-using E_Learning.API.Extensions;
-using E_Learning.API.Middleware;
+using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Base;
 using E_Learning.Core.Interfaces.Repositories.Enrollments;
 using E_Learning.Core.Interfaces.Repositories.LiveSessions;
@@ -32,6 +31,8 @@ using E_Learning.Service.Services.LiveSessionServices;
 using E_Learning.Service.Services.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using E_Learning.Repository.Repositories.GenericesRepositories;
+using E_Learning.API.Extensions;
 
 namespace E_Learning.API
 {
@@ -115,6 +116,8 @@ namespace E_Learning.API
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
             // Add services to the container.
 
+            // AddApplicationServices
+            builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
