@@ -32,16 +32,20 @@ namespace E_Learning.Service.Services.Courses
         public async Task<Response<CourseDto>> CreateCourseAsync(CreateCourseDto dto, CancellationToken ct = default)
         {
 
-            var instructor = await _unit.InstructorProfiles.GetByIdAsync(dto.InstructorId);
+            var instructor = await _unit.AppUserRepository.GetByIdAsync(dto.InstructorId);
             
             if (instructor == null)
                 return _response.NotFound<CourseDto>("Instructor not found");
 
             var course = _mapper.Map<Course>(dto);
 
+            course.Slug = $"{dto.Title.Trim().ToLower().Replace(" ", "-")}-{Guid.NewGuid().ToString()[..6]}";
+            
             await _unit.Courses.AddAsync(course);
-            var result = _mapper.Map<CourseDto>(course);
+
             await _unit.SaveChangesAsync();
+            var result = _mapper.Map<CourseDto>(course);
+            
             return _response.Created(result);
         }
 
