@@ -9,7 +9,7 @@ namespace E_Learning.Service.Services.LiveSessionServices
 {
     public interface ILiveSessionAttendeeService
     {
-        Task<Response<string>> LogAttendanceAsync(LogAttendanceDto dto, CancellationToken ct = default);
+        Task<Response<AttendeeResponseDto>> LogAttendanceAsync(LogAttendanceDto dto, CancellationToken ct = default);
         Task<Response<IReadOnlyList<AttendeeResponseDto>>> GetAttendeesBySessionIdAsync(int sessionId, CancellationToken ct = default);
     }
 }
