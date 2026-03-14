@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace E_Learning.Repository.Repositories.GenericesRepositories.Notifications
 {
     public class NotificationRepository
-    : GenericRepository<Notification, Guid>, INotificationRepository
+    : GenericRepository<Notification, int>, INotificationRepository
     {
         public NotificationRepository(ELearningDbContext context) : base(context) { }
 
@@ -40,6 +40,11 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Notifications
             var items = await Query().Where(n => n.UserId == userId && !n.IsRead).ToListAsync();
             foreach (var n in items) n.IsRead = true;
             return items.Count;
+        }
+
+        public Task GetByIdAsync(int notificationId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

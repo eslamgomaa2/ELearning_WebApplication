@@ -3,6 +3,7 @@ using E_Learning.Core.Repository;
 using E_Learning.Service.Contract.Notifications;
 using E_Learning.Service.DTOs;
 using E_Learning.Service.DTOs.Notification;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,8 +57,14 @@ namespace E_Learning.Service.Services.Notifications
 
         public async Task MarkAsReadAsync(Guid userId, int notificationId)
         {
-            var n = await _uow.Notifications.GetByIdForUserAsync(notificationId, userId);
-            if (n == null) throw new Exception("Notification not found.");
+            var tracked = await _uow.Notifications.Query()
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+            if (tracked == null)
+                throw new Exception("Notification not found.");
+
+            if (!tracked.IsRead)
+                tracked.IsRead = true;
 
             await _uow.SaveChangesAsync();
         }

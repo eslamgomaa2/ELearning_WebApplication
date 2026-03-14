@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace E_Learning.Repository.Repositories.GenericesRepositories.Notifications
 {
     public class NotificationSettingsRepository
-    : GenericRepository<NotificationSetting, Guid>, INotificationSettingsRepository
+    : GenericRepository<NotificationSetting, int>, INotificationSettingsRepository
     {
         public NotificationSettingsRepository(ELearningDbContext context) : base(context) { }
 
