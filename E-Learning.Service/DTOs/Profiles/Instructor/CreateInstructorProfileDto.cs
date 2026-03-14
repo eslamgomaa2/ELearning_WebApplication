@@ -1,18 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace E_Learning.Service.DTOs.Profiles.Admin
+namespace E_Learning.Service.DTOs.Profiles.Instructor
 {
-    public class CreateAdminProfileDto
+    public class CreateInstructorProfileDto
     {
         public string FullName { get; set; }
         public string Email { get; set; }
         public string phoneNumber { get; set; }
-        public bool IsSuperAdmin { get; set; } = false;
-        
+        public string Bio { get; set; }
+        public string Location { get; set; }
     }
 }

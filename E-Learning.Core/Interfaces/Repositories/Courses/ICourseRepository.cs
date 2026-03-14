@@ -3,7 +3,7 @@ using E_Learning.Core.Interfaces.Repositories;
 
 namespace E_Learning.core.Interfaces.Repositories.Courses
 {
-    public interface ICourseRepository:IGenericRepository<Course,int>
+    public interface ICourseRepository : IGenericRepository<Course,int>
     {
     }
 }

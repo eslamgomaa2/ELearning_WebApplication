@@ -9,7 +9,7 @@ using E_Learning.Service.DTOs.Profiles.Admin;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,28 +37,30 @@ namespace E_Learning.Service.Services.Profiles
             _responseHandler = responseHandler;
         }
 
-
         // ================= Create Admin Profile =================
-        public async Task<Response<AdminProfileResponseDto>> CreateAdminProfile(Guid userId, CreateAdminProfileDto dto, CancellationToken ct = default)
+        public async Task<Response<AdminProfileResponseDto>> CreateAdminProfile(CreateAdminProfileDto dto, CancellationToken ct = default)
         {
-            var user = await _genericRepository.GetByIdAsync(userId, ct);
-
-            if (user == null)
-                return _responseHandler.NotFound<AdminProfileResponseDto>("User not found");
-
             
-            user.FullName = dto.FullName;
-            user.Email = dto.Email;
-            user.PhoneNumber = dto.phoneNumber;
+            var user = new ApplicationUser
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                UserName = dto.Email, 
+                PhoneNumber = dto.phoneNumber,
+                IsActive = true,
+                MemberSince = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-       
+            await _genericRepository.AddAsync(user);
+            await _unit.SaveChangesAsync(ct);
+          
             var profile = new AdminProfile
             {
-                AppUserId = userId,
+                AppUserId = user.Id,
                 IsSuperAdmin = dto.IsSuperAdmin
             };
 
-           
             await _adminProfileRepository.AddAsync(profile);
             await _unit.SaveChangesAsync(ct);
 
@@ -79,9 +81,7 @@ namespace E_Learning.Service.Services.Profiles
             profile.AppUser.Email = dto.Email;
             profile.AppUser.PhoneNumber = dto.phoneNumber;
 
-          
             profile.IsSuperAdmin = dto.IsSuperAdmin;
-            
 
             await _unit.SaveChangesAsync();
 
@@ -126,8 +126,10 @@ namespace E_Learning.Service.Services.Profiles
             _adminProfileRepository.Remove(profile);
             await _unit.SaveChangesAsync();
 
-            return _responseHandler.Deleted<AdminProfileResponseDto>( "Admin profile deleted successfully");
+            return _responseHandler.Deleted<AdminProfileResponseDto>("Admin profile deleted successfully");
         }
+
+        // ================= Upload Admin Profile Picture =================
         public async Task<Response<string>> UploadProfilePicture(Guid userId, IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -148,12 +150,14 @@ namespace E_Learning.Service.Services.Profiles
             {
                 await file.CopyToAsync(stream);
             }
+
             if (!string.IsNullOrEmpty(profile.ProfilePicture))
             {
                 var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
                 if (File.Exists(oldPath))
                     File.Delete(oldPath);
             }
+
             profile.ProfilePicture = $"/images/admins/{fileName}";
             await _unit.SaveChangesAsync();
 

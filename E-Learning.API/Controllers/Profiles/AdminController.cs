@@ -1,11 +1,14 @@
 ﻿using E_Learning.Core.Base;
 using E_Learning.Service.DTOs.Profiles.Admin;
+using E_Learning.Service.DTOs.Profiles.Student;
 using E_Learning.Service.Services.Profiles;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -19,34 +22,47 @@ public class AdminController : ControllerBase
     }
 
     // ================= Create Admin Profile =================
-    [HttpPost("{userId}")]
-    public async Task<IActionResult> CreateAdminProfile(Guid userId, [FromBody] CreateAdminProfileDto dto)
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateAdminProfileDto dto)
     {
-        var response = await _adminService.CreateAdminProfile(userId, dto);
+        var response = await _adminService.CreateAdminProfile(dto);
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
+
     // ================= Update Admin Profile =================
-    [HttpPut("{userId}")]
-    public async Task<IActionResult> UpdateAdminProfile(Guid userId, [FromBody] CreateAdminProfileDto dto)
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateAdminProfile([FromBody] CreateAdminProfileDto dto)
     {
-        var response = await _adminService.UpdateAdminProfile(userId, dto);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return BadRequest("User not identified");
+
+        var response = await _adminService.UpdateAdminProfile(Guid.Parse(userIdClaim), dto);
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
     // ================= Get Admin Profile =================
-    [HttpGet("{userId}")]
-    public async Task<IActionResult> GetAdminProfileByUserId(Guid userId)
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyProfile()
     {
-        var response = await _adminService.GetAdminProfileByUserId(userId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return BadRequest("User not identified");
+
+        var response = await _adminService.GetAdminProfileByUserId(Guid.Parse(userIdClaim));
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
     // ================= Check if Admin Profile Exists =================
-    [HttpGet("exists/{userId}")]
-    public async Task<IActionResult> AdminProfileExists(Guid userId)
+    [HttpGet("exists")]
+    public async Task<IActionResult> AdminProfileExists()
     {
-        var response = await _adminService.AdminProfileExists(userId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return BadRequest("User not identified");
+
+        var response = await _adminService.AdminProfileExists(Guid.Parse(userIdClaim));
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
@@ -59,18 +75,29 @@ public class AdminController : ControllerBase
     }
 
     // ================= Delete Admin Profile =================
-    [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteAdminProfile(Guid userId)
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteMyProfile()
     {
-        var response = await _adminService.DeleteAdminProfile(userId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return BadRequest("User not identified");
+
+        var response = await _adminService.DeleteAdminProfile(Guid.Parse(userIdClaim));
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
     // ================= Upload Admin Profile Picture =================
-    [HttpPost("{userId}/upload-profile-picture")]
-    public async Task<IActionResult> UploadProfilePicture(Guid userId, IFormFile file)
+    [HttpPost("upload-profile-picture")]
+    public async Task<IActionResult> UploadProfilePicture(IFormFile file)
     {
-        var response = await _adminService.UploadProfilePicture(userId, file);
+        if (file == null)
+            return BadRequest("No file uploaded");
+
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return BadRequest("User not identified");
+
+        var response = await _adminService.UploadProfilePicture(Guid.Parse(userIdClaim), file);
         return StatusCode((int)response.HttpStatusCode, response);
     }
 }

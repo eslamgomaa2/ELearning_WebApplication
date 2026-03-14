@@ -18,7 +18,8 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
         {
             return _context.Enrollments
                 .Include(e => e.Student)
-                .Include(e => e.Course);
+                .Include(e => e.Course)
+                .Include(e => e.Transaction);
         }
 
 

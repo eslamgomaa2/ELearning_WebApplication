@@ -12,7 +12,7 @@ namespace E_Learning.Service.Services.Profiles
     public interface IAdminService
     {
         Task<Response<AdminProfileResponseDto>> GetAdminProfileByUserId(Guid userId);
-        Task<Response<AdminProfileResponseDto>> CreateAdminProfile(Guid userId, CreateAdminProfileDto dto, CancellationToken ct = default);
+        Task<Response<AdminProfileResponseDto>> CreateAdminProfile( CreateAdminProfileDto dto, CancellationToken ct = default);
         Task<Response<AdminProfileResponseDto>> UpdateAdminProfile(Guid userId, CreateAdminProfileDto dto);
         Task<Response<bool>> AdminProfileExists(Guid userId);
         Task<Response<IEnumerable<AdminProfileResponseDto>>> GetAllAdmins();

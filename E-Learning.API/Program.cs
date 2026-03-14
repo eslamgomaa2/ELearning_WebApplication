@@ -9,6 +9,7 @@ using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Assessments.Assignments;
 using E_Learning.Core.Interfaces.Repositories.Enrollments;
 using E_Learning.Core.Interfaces.Repositories.LiveSessions;
+using E_Learning.Core.Interfaces.Repositories.Profile;
 using E_Learning.Core.Interfaces.Services.Courses;
 using E_Learning.Core.Interfaces.Services.Enrollments;
 using E_Learning.Core.Repository;
@@ -18,6 +19,7 @@ using E_Learning.Repository.Repositories.GenericesRepositories;
 using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Assignments;
 using E_Learning.Repository.Repositories.GenericesRepositories.Enrollments;
 using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
+using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
 using E_Learning.Service.Contract.Assignments;
 using E_Learning.Service.Mapping;
@@ -26,6 +28,7 @@ using E_Learning.Service.Services.AssignmentService;
 using E_Learning.Service.Services.Courses;
 using E_Learning.Service.Services.Enrollments;
 using E_Learning.Service.Services.LiveSessionServices;
+using E_Learning.Service.Services.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,12 +66,22 @@ namespace E_Learning.API
             builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 
             builder.Services.AddTransient<ResponseHandler>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<IInstructorService, InstructorService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
 
+  
             builder.Services.AddScoped<ILiveSessionService, LiveSessionService>();
             builder.Services.AddScoped<ILiveSessionAttendeeService, LiveSessionAttendeeService>();
             
             builder.Services.AddScoped<ILiveSessionRepository, LiveSessionRepository>();
             builder.Services.AddScoped<ILiveSessionAttendeeRepository, LiveSessionAttendeeRepository>();
+            builder.Services.AddScoped<IAdminProfileRepository, AdminProfileRepository>();
+            builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
+            builder.Services.AddScoped<IStudentProfileRepository, StudentProfileRepository>();
+            
+
+
             //// Auto Mapper
             builder.Services.AddAutoMapper(typeof(EnrollmentMappingProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(AssignmentProfile).Assembly);
