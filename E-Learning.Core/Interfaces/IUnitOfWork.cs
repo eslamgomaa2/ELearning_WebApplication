@@ -2,6 +2,7 @@
 using E_Learning.core.Interfaces.Repositories.Assessments.Quizzes;
 using E_Learning.core.Interfaces.Repositories.Authentications;
 using E_Learning.core.Interfaces.Repositories.Courses;
+using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Academic;
 using E_Learning.Core.Interfaces.Repositories.AdminOperations;
 using E_Learning.Core.Interfaces.Repositories.Assessments.Assignments;
@@ -17,7 +18,7 @@ namespace E_Learning.Core.Repository
 {
     public interface IUnitOfWork :IAsyncDisposable
     {
-
+        IAppUserRepository AppUserRepository { get; }
         #region Authentications
         IUserSessionRepository UserSessions { get; }
         IOtpCodeRepository OtpCodes { get; }
