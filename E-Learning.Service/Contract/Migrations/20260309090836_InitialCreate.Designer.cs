@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Learning.Repository.Migrations
 {
     [DbContext(typeof(ELearningDbContext))]
-    [Migration("20260311210223_InitialCreate")]
+    [Migration("20260309090836_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1103,9 +1103,6 @@ namespace E_Learning.Repository.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CourseId1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1122,8 +1119,6 @@ namespace E_Learning.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("CourseId1");
 
                     b.ToTable("Sections", (string)null);
                 });
@@ -1442,9 +1437,6 @@ namespace E_Learning.Repository.Migrations
                     b.Property<DateTime?>("LeftAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("LiveSessionId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SessionId")
                         .HasColumnType("int");
 
@@ -1452,8 +1444,6 @@ namespace E_Learning.Repository.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LiveSessionId");
 
                     b.HasIndex("StudentId");
 
@@ -2597,10 +2587,6 @@ namespace E_Learning.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("E_Learning.Core.Entities.Courses.Course", null)
-                        .WithMany("Sections")
-                        .HasForeignKey("CourseId1");
-
                     b.Navigation("Course");
                 });
 
@@ -2692,10 +2678,6 @@ namespace E_Learning.Repository.Migrations
 
             modelBuilder.Entity("E_Learning.Core.Entities.LiveSessions.LiveSessionAttendee", b =>
                 {
-                    b.HasOne("E_Learning.Core.Entities.LiveSessions.LiveSession", null)
-                        .WithMany("Attendees")
-                        .HasForeignKey("LiveSessionId");
-
                     b.HasOne("E_Learning.Core.Entities.LiveSessions.LiveSession", "Session")
                         .WithMany()
                         .HasForeignKey("SessionId")
@@ -2990,19 +2972,9 @@ namespace E_Learning.Repository.Migrations
                     b.Navigation("PayoutApproval");
                 });
 
-            modelBuilder.Entity("E_Learning.Core.Entities.Courses.Course", b =>
-                {
-                    b.Navigation("Sections");
-                });
-
             modelBuilder.Entity("E_Learning.Core.Entities.Courses.Section", b =>
                 {
                     b.Navigation("Lessons");
-                });
-
-            modelBuilder.Entity("E_Learning.Core.Entities.LiveSessions.LiveSession", b =>
-                {
-                    b.Navigation("Attendees");
                 });
 
             modelBuilder.Entity("E_Learning.Core.Entities.Support.SupportTicket", b =>

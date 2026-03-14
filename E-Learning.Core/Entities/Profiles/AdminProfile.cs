@@ -16,6 +16,7 @@ namespace E_Learning.Core.Entities.Profiles
         public string? ProfilePicture { get; set; }
         public string? Location { get; set; }
         public DateOnly? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
         public bool IsSuperAdmin { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

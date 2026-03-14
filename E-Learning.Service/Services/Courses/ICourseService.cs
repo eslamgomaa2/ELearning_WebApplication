@@ -12,11 +12,11 @@ namespace E_Learning.Core.Interfaces.Services.Courses
 {
     public interface ICourseService
     {
-        Task<Response<IReadOnlyList<CourseDto>>> GetCoursesAsync();
-        Task<Response<CourseDto>> GetCourseByIdAsync(int id);
+        Task<Response<IReadOnlyList<CourseDto>>> GetCoursesAsync(CancellationToken ct = default);
+        Task<Response<CourseDto>> GetCourseByIdAsync(int id, CancellationToken ct = default);
 
-        Task<Response<CourseDto>> CreateCourseAsync(CreateCourseDto course);
-        Task<Response<string>> UpdateCourseAsync(UpdateCourseDto course);
-        Task<Response<string>> DeleteCourseAsync(int id);
+        Task<Response<CourseDto>> CreateCourseAsync(CreateCourseDto course, CancellationToken ct = default);
+        Task<Response<string>> UpdateCourseAsync(UpdateCourseDto course, CancellationToken ct = default);
+        Task<Response<string>> DeleteCourseAsync(int id, CancellationToken ct = default);
     }
 }

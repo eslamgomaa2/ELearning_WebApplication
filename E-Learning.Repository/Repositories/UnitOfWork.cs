@@ -2,6 +2,7 @@
 using E_Learning.core.Interfaces.Repositories.Assessments.Quizzes;
 using E_Learning.core.Interfaces.Repositories.Authentications;
 using E_Learning.core.Interfaces.Repositories.Courses;
+using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Academic;
 using E_Learning.Core.Interfaces.Repositories.AdminOperations;
 using E_Learning.Core.Interfaces.Repositories.Assessments.Assignments;
@@ -14,6 +15,7 @@ using E_Learning.Core.Interfaces.Repositories.Profile;
 using E_Learning.Core.Interfaces.Repositories.Schedule;
 using E_Learning.Core.Repository;
 using E_Learning.Repository.Data;
+using E_Learning.Repository.Repositories.GenericesRepositories;
 using E_Learning.Repository.Repositories.GenericesRepositories.Academic;
 using E_Learning.Repository.Repositories.GenericesRepositories.AdminOperations;
 using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Assignments;
@@ -38,11 +40,11 @@ namespace E_Learning.Repository.Repositories
 
         public UnitOfWork(ELearningDbContext context) => _context = context;
 
-
+        private IAppUserRepository _userRepository;
         private IUserSessionRepository? _userSessions;
         private IOtpCodeRepository? _otpCodes;
         private IStudentProfileRepository? _studentProfiles;
-        private IInstructorProfileRepository? _instructorProfiles;
+        private Core.Interfaces.Repositories.Profile.IInstructorProfileRepository? _instructorProfiles;
         private IAdminProfileRepository? _adminProfiles;
         private IStageRepository? _stages;
         private ILevelRepository? _levels;
@@ -84,7 +86,7 @@ namespace E_Learning.Repository.Repositories
         public IUserSessionRepository UserSessions => _userSessions ??= new UserSessionRepository(_context);
         public IOtpCodeRepository OtpCodes => _otpCodes ??= new OtpCodeRepository(_context);
         public IStudentProfileRepository StudentProfiles => _studentProfiles ??= new StudentProfileRepository(_context);
-        public IInstructorProfileRepository InstructorProfiles => _instructorProfiles ??= new InstructorProfileRepository(_context);
+        public Core.Interfaces.Repositories.Profile.IInstructorProfileRepository InstructorProfiles => _instructorProfiles ??= new GenericesRepositories.Profile.InstructorProfileRepository(_context);
         public IAdminProfileRepository AdminProfiles => _adminProfiles ??= new AdminProfileRepository(_context);
         public IStageRepository Stages => _stages ??= new StageRepository(_context);
         public ILevelRepository Levels => _levels ??= new LevelRepository(_context);
@@ -123,7 +125,7 @@ namespace E_Learning.Repository.Repositories
         public ICourseAnalyticsSnapshotRepository CourseAnalyticsSnapshots
             => _courseAnalyticsSnapshots ??= new CourseAnalyticsSnapshotRepository(_context);
 
-    
+        public IAppUserRepository AppUserRepository => _userRepository ??= new AppUserRepository(_context);
 
         public Task<int> SaveChangesAsync(CancellationToken ct = default)
             => _context.SaveChangesAsync(ct);

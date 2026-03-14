@@ -19,7 +19,7 @@ namespace E_Learning.Core.Entities.Profiles
         public DateOnly? DateOfBirth { get; set; }
         public string? Headline { get; set; }
         public string? About { get; set; }
-
+        public string? Gender { get; set; }
         public decimal TotalEarnings { get; set; } = 0;
         public decimal PendingPayout { get; set; } = 0;
 

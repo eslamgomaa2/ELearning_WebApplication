@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using E_learning.Core.Entities.Identity;
+using E_Learning.Core.Entities.Billing;
 using E_Learning.Core.Entities.Courses;
 using E_Learning.Core.Entities.Enrollment;
 using E_Learning.Service.DTOs.Enrollments.Enrollment;
@@ -18,10 +19,6 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
-                .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture))
-                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Location))
-                .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth))
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
                 .ForMember(dest => dest.MemberSince, opt => opt.MapFrom(src => src.MemberSince))
                 .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language))
@@ -45,7 +42,19 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
                 .ForMember(dest => dest.ApprovedAt, opt => opt.MapFrom(src => src.ApprovedAt));
 
-            // ── Lesson → LessonSummaryDto ────────────────────────────────────
+            // ── PaymentTransaction → TransactionSummaryDto ───────────────────
+            CreateMap<PaymentTransaction, TransactionSummaryDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
+                .ForMember(dest => dest.CourseId, opt => opt.MapFrom(src => src.CourseId))
+                .ForMember(dest => dest.PaymentMethodId, opt => opt.MapFrom(src => src.PaymentMethodId))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => src.Currency))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+                .ForMember(dest => dest.GatewayReference, opt => opt.MapFrom(src => src.GatewayReference))
+                .ForMember(dest => dest.FailureReason, opt => opt.MapFrom(src => src.FailureReason))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.CompletedAt, opt => opt.MapFrom(src => src.CompletedAt));
             CreateMap<Lesson, LessonSummaryDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title));
@@ -62,6 +71,7 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.LastAccessedAt, opt => opt.MapFrom(src => src.LastAccessedAt));
 
             // ── Enrollment → EnrollmentSummaryDto ────────────────────────────
+            // Lightweight version used inside LessonProgressResponseDto
             // Does NOT include LessonProgresses to avoid circular reference
             CreateMap<Enrollment, EnrollmentSummaryDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -70,6 +80,7 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.CourseId, opt => opt.MapFrom(src => src.CourseId))
                 .ForMember(dest => dest.Course, opt => opt.MapFrom(src => src.Course))
                 .ForMember(dest => dest.TransactionId, opt => opt.MapFrom(src => src.TransactionId))
+                .ForMember(dest => dest.Transaction, opt => opt.MapFrom(src => src.Transaction))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.ProgressPercentage, opt => opt.MapFrom(src => src.ProgressPercentage))
                 .ForMember(dest => dest.EnrolledAt, opt => opt.MapFrom(src => src.EnrolledAt))
@@ -77,7 +88,7 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted));
 
             // ── Enrollment → EnrollmentResponseDto ───────────────────────────
-            // Full version — includes Student, Course, and all LessonProgresses
+            // Full version — includes Student, Course, Transaction, and all LessonProgresses
             CreateMap<Enrollment, EnrollmentResponseDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
@@ -85,6 +96,7 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.CourseId, opt => opt.MapFrom(src => src.CourseId))
                 .ForMember(dest => dest.Course, opt => opt.MapFrom(src => src.Course))
                 .ForMember(dest => dest.TransactionId, opt => opt.MapFrom(src => src.TransactionId))
+                .ForMember(dest => dest.Transaction, opt => opt.MapFrom(src => src.Transaction))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
                 .ForMember(dest => dest.ProgressPercentage, opt => opt.MapFrom(src => src.ProgressPercentage))
                 .ForMember(dest => dest.EnrolledAt, opt => opt.MapFrom(src => src.EnrolledAt))
