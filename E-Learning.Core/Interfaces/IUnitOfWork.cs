@@ -12,6 +12,7 @@ using E_Learning.Core.Interfaces.Repositories.LiveSessions;
 using E_Learning.Core.Interfaces.Repositories.Notifications;
 using E_Learning.Core.Interfaces.Repositories.Payments;
 using E_Learning.Core.Interfaces.Repositories.Profile;
+using E_Learning.Core.Interfaces.Repositories.Reviews_Certificates;
 using E_Learning.Core.Interfaces.Repositories.Schedule;
 
 namespace E_Learning.Core.Repository
