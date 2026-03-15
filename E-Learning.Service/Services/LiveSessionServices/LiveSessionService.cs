@@ -9,7 +9,9 @@ using E_Learning.Core.Enums;
 using E_Learning.Core.Interfaces.Services.Courses;
 using E_Learning.Core.Repository;
 using E_Learning.Service.DTOs.LiveSessionDto;
+using E_Learning.Service.Hubs;
 using E_Learning.Service.Services.Profiles;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace E_Learning.Service.Services.LiveSessionServices
@@ -21,15 +23,17 @@ namespace E_Learning.Service.Services.LiveSessionServices
         private readonly IMapper _mapper;
         private readonly ICourseService _courseService;
         private readonly IInstructorService _instructorService;
+        private readonly IHubContext<LiveSessionHub> _hubContext;
 
         public LiveSessionService(IUnitOfWork uow, ResponseHandler responseHandler, IMapper mapper, ICourseService courseService,
-        IInstructorService instructorService)
+        IInstructorService instructorService, IHubContext<LiveSessionHub> hubContext)
         {
             _uow = uow;
             _responseHandler = responseHandler;
             _mapper = mapper;
             _courseService = courseService;
             _instructorService = instructorService;
+            _hubContext = hubContext;
         }
 
 
@@ -106,6 +110,9 @@ namespace E_Learning.Service.Services.LiveSessionServices
             await _uow.LiveSessions.AddAsync(session, ct);
             await _uow.SaveChangesAsync(ct);
             var result = await GetByIdAsync(session.Id, ct);
+            
+            //  Real-time
+            await _hubContext.Clients.All.SendAsync("OnSessionCreated", result.Data);
 
             return _responseHandler.Created(result.Data);
         }
@@ -113,12 +120,11 @@ namespace E_Learning.Service.Services.LiveSessionServices
         async Task<Response<LiveSessionResponseDto>> ILiveSessionService.DeleteAsync(int id, CancellationToken ct)
         {
             var session = await _uow.LiveSessions.GetTableNoTracking()
-         .Include(x => x.Course)
-         .Include(x => x.Instructor)
-         .Include(x => x.Attendees)
-         .FirstOrDefaultAsync(x => x.Id == id, ct);
+                .Include(x => x.Course)
+                .Include(x => x.Instructor)
+                .Include(x => x.Attendees)
+                .FirstOrDefaultAsync(x => x.Id == id, ct);
 
-            // 2. Check if it exists
             if (session is null)
                 return _responseHandler.NotFound<LiveSessionResponseDto>($"Live Session with ID {id} was not found.");
 
@@ -127,6 +133,9 @@ namespace E_Learning.Service.Services.LiveSessionServices
             var entityToDelete = await _uow.LiveSessions.GetByIdAsync(id, ct);
             _uow.LiveSessions.SoftDelete(entityToDelete);
             await _uow.SaveChangesAsync(ct);
+
+            //  Real-time 
+            await _hubContext.Clients.All.SendAsync("OnSessionDeleted", id);
 
             return _responseHandler.Success(deletedData);
         }
@@ -140,13 +149,15 @@ namespace E_Learning.Service.Services.LiveSessionServices
             if (dto.CourseId != session.CourseId)
             {
                 var courseCheck = await _courseService.GetCourseByIdAsync(dto.CourseId, ct);
-                if (courseCheck.Data == null) return _responseHandler.NotFound<LiveSessionResponseDto>("New Course not found.");
+                if (courseCheck.Data == null)
+                    return _responseHandler.NotFound<LiveSessionResponseDto>("New Course not found.");
             }
 
             if (dto.InstructorId != session.InstructorId)
             {
                 var instructorCheck = await _instructorService.InstructorProfileExists(dto.InstructorId);
-                if (instructorCheck.Data == false) return _responseHandler.NotFound<LiveSessionResponseDto>("New Instructor not found.");
+                if (instructorCheck.Data == false)
+                    return _responseHandler.NotFound<LiveSessionResponseDto>("New Instructor not found.");
             }
 
             _mapper.Map(dto, session);
@@ -154,6 +165,10 @@ namespace E_Learning.Service.Services.LiveSessionServices
             await _uow.SaveChangesAsync(ct);
 
             var result = await GetByIdAsync(id, ct);
+
+            // Real-time 
+            await _hubContext.Clients.All.SendAsync("OnSessionUpdated", result.Data);
+
             return _responseHandler.Success(result.Data);
         }
     }

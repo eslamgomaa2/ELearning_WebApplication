@@ -7,7 +7,7 @@ namespace E_Learning.Service.DTOs.LiveSessionDto
 {
     public class LiveSessionResponseDto
     {
-        public int Id { get; set; }
+        
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string CourseTitle { get; set; } = string.Empty;
@@ -15,6 +15,7 @@ namespace E_Learning.Service.DTOs.LiveSessionDto
         public DateTime ScheduledAt { get; set; }
         public int DurationMinutes { get; set; }
         public string Status { get; set; } 
+        public string StageName { get; set; } = string.Empty;
         public string RoomName { get; set; } = string.Empty;
         public int AttendeesCount { get; set; }
     }

@@ -32,7 +32,7 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions
 
         public IQueryable<LiveSession> GetTableNoTracking()
         {
-            throw new NotImplementedException();
+            return _context.LiveSessions.AsNoTracking();
         }
 
         public void SoftDelete(LiveSession liveSession)

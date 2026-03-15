@@ -22,6 +22,7 @@ using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
 using E_Learning.Service.Contract.Assignments;
+using E_Learning.Service.Hubs;
 using E_Learning.Service.Mapping;
 using E_Learning.Service.Services;
 using E_Learning.Service.Services.AssignmentService;
@@ -31,6 +32,7 @@ using E_Learning.Service.Services.LiveSessionServices;
 using E_Learning.Service.Services.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace E_Learning.API
 {
@@ -110,7 +112,8 @@ namespace E_Learning.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddSignalR();
+               
             var app = builder.Build();
 
             await app.MigrateDatabaseAsync();
@@ -127,6 +130,7 @@ namespace E_Learning.API
             app.UseStaticFiles();
 
             app.MapControllers();
+            app.MapHub<LiveSessionHub>("/liveSessionHub");
 
             app.Run();
         }
