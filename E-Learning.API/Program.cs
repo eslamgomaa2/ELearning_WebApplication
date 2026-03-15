@@ -21,6 +21,7 @@ using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
 using E_Learning.Service.Contract.Assignments;
+using E_Learning.Service.Hubs;
 using E_Learning.Service.Contract.Notifications;
 using E_Learning.Service.Mapping;
 using E_Learning.Service.Services;
@@ -36,6 +37,7 @@ using E_Learning.Service.Services.Reviews_Certificates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 
 namespace E_Learning.API
 {
@@ -125,7 +127,8 @@ namespace E_Learning.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddSignalR();
+               
             var app = builder.Build();
             // ─── Migration & Seeding ─────────────────────
             await app.MigrateDatabaseAsync();
@@ -142,6 +145,7 @@ namespace E_Learning.API
 
 
             app.MapControllers();
+            app.MapHub<LiveSessionHub>("/liveSessionHub");
 
             app.Run();
         }

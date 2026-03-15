@@ -13,6 +13,7 @@ namespace E_Learning.Service.DTOs.LiveSessionDto
         public Guid InstructorId { get; set; }
         public DateTime ScheduledAt { get; set; }
         public int DurationMinutes { get; set; }
+        public int StageId { get; set; }
         public string RoomName { get; set; } = string.Empty;
     }
 }
