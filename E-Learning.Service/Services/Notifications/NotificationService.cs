@@ -27,7 +27,6 @@ namespace E_Learning.Service.Services.Notifications
             string body,
             NotificationType type = NotificationType.General)
         {
-
             var settings = await _uow.NotificationSettings
                 .Query()
                 .FirstOrDefaultAsync(s => s.UserId == userId);
@@ -45,7 +44,6 @@ namespace E_Learning.Service.Services.Notifications
             if (!settings.InAppNotification)
                 return;
 
-
             var notification = new Notification
             {
                 UserId = userId,
@@ -59,7 +57,6 @@ namespace E_Learning.Service.Services.Notifications
             await _uow.Notifications.AddAsync(notification);
             await _uow.SaveChangesAsync();
 
-
             var payload = new NotificationPayload
             {
                 Id = notification.Id,
@@ -71,14 +68,12 @@ namespace E_Learning.Service.Services.Notifications
             };
 
             var userIdString = userId.ToString();
-
             await _hubService.SendNotificationToUser(userIdString, payload);
 
             var unreadCount = await _uow.Notifications.GetUnreadCountAsync(userId);
             await _hubService.SendUnreadCountToUser(userIdString, unreadCount);
         }
 
-       
         public async Task SendToMultipleUsersAsync(
             IEnumerable<Guid> userIds,
             string title,
@@ -91,7 +86,6 @@ namespace E_Learning.Service.Services.Notifications
             }
         }
 
-        
         public async Task DeleteNotificationAsync(Guid userId, int notificationId)
         {
             var notification = await _uow.Notifications.Query()
@@ -109,8 +103,6 @@ namespace E_Learning.Service.Services.Notifications
             var unreadCount = await _uow.Notifications.GetUnreadCountAsync(userId);
             await _hubService.SendUnreadCountToUser(userIdString, unreadCount);
         }
-
-        
 
         public async Task<PagedResultDto<NotificationDto>> GetMyNotificationsAsync(
             Guid userId, NotificationQueryDto q)
@@ -163,15 +155,26 @@ namespace E_Learning.Service.Services.Notifications
                 tracked.IsRead = true;
 
             await _uow.SaveChangesAsync();
+
+            // Real-time: notify all user tabs
+            var userIdString = userId.ToString();
+            await _hubService.SendNotificationReadToUser(userIdString, notificationId);
+
+            var unreadCount = await _uow.Notifications.GetUnreadCountAsync(userId);
+            await _hubService.SendUnreadCountToUser(userIdString, unreadCount);
         }
 
         public async Task MarkAllAsReadAsync(Guid userId)
         {
             await _uow.Notifications.MarkAllAsReadAsync(userId);
             await _uow.SaveChangesAsync();
+
+            // Real-time: notify all user tabs
+            var userIdString = userId.ToString();
+            await _hubService.SendAllReadToUser(userIdString);
+            await _hubService.SendUnreadCountToUser(userIdString, 0);
         }
 
-       
         private static bool IsTypeEnabled(NotificationSetting settings, NotificationType type)
         {
             return type switch
