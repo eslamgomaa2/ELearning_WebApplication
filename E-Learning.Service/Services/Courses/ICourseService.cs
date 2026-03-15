@@ -1,13 +1,7 @@
 ﻿using E_Learning.Core.Base;
-using E_Learning.Core.Entities.Courses;
 using E_Learning.Core.Features.Courses.Queries;
 using E_Learning.Service.DTOs.Course;
 using E_Learning.Service.DTOs.CourseDto;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace E_Learning.Core.Interfaces.Services.Courses
 {
