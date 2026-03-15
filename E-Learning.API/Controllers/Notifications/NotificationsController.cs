@@ -46,7 +46,6 @@ namespace E_Learning.API.Controllers
                 var res = msg.Contains("not found", StringComparison.OrdinalIgnoreCase)
                     ? _response.NotFound<object>(msg)
                     : _response.BadRequest<object>(msg);
-
                 return StatusCode((int)res.HttpStatusCode, res);
             }
         }
@@ -86,7 +85,6 @@ namespace E_Learning.API.Controllers
                 var res = msg.Contains("not found", StringComparison.OrdinalIgnoreCase)
                     ? _response.NotFound<object>(msg)
                     : _response.BadRequest<object>(msg);
-
                 return StatusCode((int)res.HttpStatusCode, res);
             }
         }
@@ -105,6 +103,27 @@ namespace E_Learning.API.Controllers
             catch (Exception ex)
             {
                 var res = _response.BadRequest<object>(ex.Message);
+                return StatusCode((int)res.HttpStatusCode, res);
+            }
+        }
+
+        // DELETE /api/notifications/{id}
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteNotification([FromRoute] int id)
+        {
+            try
+            {
+                var userId = GetUserId();
+                await _service.DeleteNotificationAsync(userId, id);
+                var res = _response.Success(new { message = "Notification deleted." });
+                return StatusCode((int)res.HttpStatusCode, res);
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.Message ?? "BadRequest";
+                var res = msg.Contains("not found", StringComparison.OrdinalIgnoreCase)
+                    ? _response.NotFound<object>(msg)
+                    : _response.BadRequest<object>(msg);
                 return StatusCode((int)res.HttpStatusCode, res);
             }
         }
