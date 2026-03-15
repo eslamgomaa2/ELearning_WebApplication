@@ -12,6 +12,7 @@ using E_Learning.Core.Interfaces.Repositories.Profile;
 using E_Learning.Core.Interfaces.Services.Academic;
 using E_Learning.Core.Interfaces.Services.Courses;
 using E_Learning.Core.Interfaces.Services.Enrollments;
+using E_Learning.Core.Interfaces.Services.Reviews_Certificates;
 using E_Learning.Core.Repository;
 using E_Learning.Repository.Data;
 using E_Learning.Repository.Repositories;
@@ -21,6 +22,7 @@ using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
 using E_Learning.Service.Contract.Assignments;
+using E_Learning.Service.Hubs;
 using E_Learning.Service.Contract.Notifications;
 using E_Learning.Service.Mapping;
 using E_Learning.Service.Services;
@@ -32,8 +34,11 @@ using E_Learning.Service.Services.Enrollments;
 using E_Learning.Service.Services.LiveSessionServices;
 using E_Learning.Service.Services.Notifications;
 using E_Learning.Service.Services.Profiles;
+using E_Learning.Service.Services.Reviews_Certificates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace E_Learning.API
 {
@@ -86,7 +91,7 @@ namespace E_Learning.API
             builder.Services.AddScoped<IAdminProfileRepository, AdminProfileRepository>();
             builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
             builder.Services.AddScoped<IStudentProfileRepository, StudentProfileRepository>();
-
+            builder.Services.AddScoped<ICertificateServices, CertificateServices>();
 
 
             //// Auto Mapper
@@ -178,6 +183,8 @@ namespace E_Learning.API
     });
             });
 
+            builder.Services.AddSignalR();
+               
             var app = builder.Build();
 
             // ─── Migration & Seeding ─────────────────────
@@ -199,6 +206,7 @@ namespace E_Learning.API
             app.UseStaticFiles();
 
             app.MapControllers();
+            app.MapHub<LiveSessionHub>("/liveSessionHub");
 
 
             app.MapHub<NotificationHub>("/hubs/notifications");

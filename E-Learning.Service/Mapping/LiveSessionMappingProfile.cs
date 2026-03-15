@@ -7,16 +7,20 @@ namespace E_Learning.Service.Mapping
 {
     public class LiveSessionMappingProfile : Profile
     {
-    
-      public LiveSessionMappingProfile()
+
+        public LiveSessionMappingProfile()
         {
             // 1. LiveSession → LiveSessionResponseDto
             CreateMap<LiveSession, LiveSessionResponseDto>()
                 .ForMember(dest => dest.CourseTitle, opt => opt.MapFrom(src => src.Course != null ? src.Course.Title : string.Empty))
                 .ForMember(dest => dest.InstructorName, opt => opt.MapFrom(src => src.Instructor != null ? src.Instructor.UserName : string.Empty))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.AttendeesCount, opt => opt.MapFrom(src => src.Attendees != null ? src.Attendees.Count : 0));
-
+                .ForMember(dest => dest.AttendeesCount, opt => opt.MapFrom(src => src.Attendees != null ? src.Attendees.Count : 0))
+               .ForMember(dest => dest.StageName, opt => opt.MapFrom(src =>
+                 (src.Course != null && src.Course.Level != null && src.Course.Level.Stage != null)
+                 ? src.Course.Level.Stage.Name
+                   : "N/A"));
+                   
             // 2. LiveSessionAttendee → AttendeeResponseDto
             CreateMap<LiveSessionAttendee, AttendeeResponseDto>()
                 .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => src.Student != null ? src.Student.UserName : string.Empty))
