@@ -36,6 +36,7 @@ namespace E_learning.API.Extensions
                 var userManager = services
                     .GetRequiredService<UserManager<ApplicationUser>>();
                 await AdminSeeding.SeedAdminAsync(userManager);
+                await CourseSeeding.SeedCoursesAsync(dbContext, userManager);
                 logger.LogInformation("Default accounts seeded successfully");
 
 

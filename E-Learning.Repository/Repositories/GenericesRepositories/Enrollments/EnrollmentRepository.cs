@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Learning.Repository.Repositories.GenericesRepositories.Enrollments
 {
-    public class EnrollmentRepository : IEnrollmentRepository
+    public class EnrollmentRepository : GenericRepository<Enrollment , int> , IEnrollmentRepository
     {
         private readonly ELearningDbContext _context;
 
-        public EnrollmentRepository(ELearningDbContext context)
+        public EnrollmentRepository(ELearningDbContext context) : base(context)
         {
             _context = context;
         }

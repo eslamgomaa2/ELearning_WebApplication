@@ -118,6 +118,8 @@ namespace E_Learning.API
 
             // AddApplicationServices
             builder.Services.AddApplicationServices(builder.Configuration);
+            // JWT Authentication
+            builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

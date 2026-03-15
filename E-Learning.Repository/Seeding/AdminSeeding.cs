@@ -61,5 +61,25 @@ public static class AdminSeeding
             if (result.Succeeded)
                 await userManager.AddToRoleAsync(instructor, "Instructor");
         }
+        // ═══════════════════════════════════════════════════════
+        // Student ACCOUNT
+        // ═══════════════════════════════════════════════════════
+
+        var studentEmail = "student@elearning.com";
+        var student = await userManager.FindByEmailAsync(studentEmail);
+        if (student == null)
+        {
+            student = new ApplicationUser
+            {
+                FullName = "Demo Student",
+                UserName = studentEmail,
+                Email = studentEmail,
+                EmailConfirmed = true,
+                IsActive = true,
+                MemberSince = DateTime.UtcNow,
+            };
+            await userManager.CreateAsync(student, "Student@123456");
+            await userManager.AddToRoleAsync(student, "Student");
+        }
     }
 }

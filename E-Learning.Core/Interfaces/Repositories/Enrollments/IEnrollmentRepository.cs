@@ -2,7 +2,7 @@
 
 namespace E_Learning.Core.Interfaces.Repositories.Enrollments
 {
-    public interface IEnrollmentRepository
+    public interface IEnrollmentRepository : IGenericRepository<Enrollment, int>
     {
 
         Task<Enrollment?> GetByIdAsync(int id, CancellationToken ct = default);

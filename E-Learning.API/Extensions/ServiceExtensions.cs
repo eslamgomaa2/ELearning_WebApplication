@@ -6,6 +6,7 @@ using E_Learning.Service.Contract;
 using E_Learning.Service.Services;
 using E_Learning.Service.Services.Courses;
 using E_Learning.Service.Services.LiveSessionServices;
+using E_Learning.Service.Services.Payment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -26,7 +27,7 @@ public static class ServiceExtensions
 
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<ILiveSessionService, LiveSessionService>();
-
+        services.AddScoped<IPaymentService, PaymentService>();
         return services;
     }
 
