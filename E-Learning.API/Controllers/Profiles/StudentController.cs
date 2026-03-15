@@ -20,14 +20,14 @@ namespace E_Learning.API.Controllers.Profiles
             _studentService = studentService;
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateInstructorProfile([FromForm] CreateStudentProfileDto dto)
+       /* [HttpPost("create")]
+        public async Task<IActionResult> CreateInstructorProfile([FromForm] UpdateStudentProfileDto dto)
         {
             var response = await _studentService.CreateStudentProfile(dto);
             return StatusCode((int)response.HttpStatusCode, response);
-        }
+        }*/
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateStudentProfile(Guid userId, [FromForm] CreateStudentProfileDto dto)
+        public async Task<IActionResult> UpdateStudentProfile(Guid userId, [FromForm] UpdateStudentProfileDto dto)
         {
             var response = await _studentService.UpdateStudentProfile(userId, dto);
             return StatusCode((int)response.HttpStatusCode, response);

@@ -5,23 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace E_Learning.Service.DTOs.Profiles.Student
+namespace E_Learning.Service.DTOs.Profiles.Admin
 {
-    public class CreateStudentProfileDto
+    public class UpdateAdminProfileDto
     {
-
         public string FullName { get; set; }
         public string Email { get; set; }
         public string phoneNumber { get; set; }
-        public string location { get; set; }
-        public DateOnly? DateOfBirth { get; set; } = null;
-        public DateTime? MemberSince { get; set; } = null;
+        public string Password { get; set; }
+        public string Role { get; set; }
         public IFormFile? ProfilePicture { get; set; }
-
-
-
-
-
-
     }
 }

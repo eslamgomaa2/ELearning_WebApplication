@@ -13,7 +13,7 @@ namespace E_Learning.Service.Services.Profiles
     {
         Task<Response<InstructorProfileResponseDto>> GetInstructorProfileByUserId(Guid userId);
         //Task<Response<InstructorProfileResponseDto>> CreateInstructorProfile(CreateInstructorProfileDto dto, CancellationToken ct = default);
-        Task<Response<InstructorProfileResponseDto>> UpdateInstructorProfile(Guid userId, CreateInstructorProfileDto dto);
+        Task<Response<InstructorProfileResponseDto>> UpdateInstructorProfile(Guid userId, UpdateInstructorProfileDto dto);
         Task<Response<bool>> InstructorProfileExists(Guid userId);
         Task<Response<IEnumerable<InstructorProfileResponseDto>>> GetAllInstructors();
         Task<Response<InstructorProfileResponseDto>> DeleteInstructorProfile(Guid userId);

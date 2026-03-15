@@ -28,24 +28,24 @@ public class AdminController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreateAdminProfile([FromForm] CreateAdminProfileDto dto)
     {
-        var response = await _adminService.CreateAdminProfile(dto);
+        var response = await _adminService.CreateUserProfile(dto);
         return StatusCode((int)response.HttpStatusCode, response);
     }
 
-    // ================= Create Instructor Profile =================
+    /*// ================= Create Instructor Profile =================
     [HttpPost("create-instructor")]
     public async Task<IActionResult> CreateInstructorProfile([FromForm] CreateInstructorProfileDto dto)
     {
         var response = await _adminService.CreateInstructorProfile(dto);
         return StatusCode((int)response.HttpStatusCode, response);
-    }
+    }*/
 
 
 
 
     // ================= Update Admin Profile =================
     [HttpPut("{userId}")]
-    public async Task<IActionResult> UpdateAdminProfile(Guid userId, [FromForm] CreateAdminProfileDto dto)
+    public async Task<IActionResult> UpdateAdminProfile(Guid userId, [FromForm] UpdateAdminProfileDto dto)
     {
         var response = await _adminService.UpdateAdminProfile(userId, dto);
         return StatusCode((int)response.HttpStatusCode, response);

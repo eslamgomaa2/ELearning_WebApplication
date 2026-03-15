@@ -10,7 +10,8 @@ namespace E_Learning.Repository.Data
             var optionsBuilder = new DbContextOptionsBuilder<ELearningDbContext>();
 
             optionsBuilder.UseSqlServer(
-                     "Server=(localdb)\\ProjectModels;Database=ELearning;Trusted_Connection=True;TrustServerCertificate=True");
+                "Server=SALMA\\SQLEXPRESS;Database=ELearning;Trusted_Connection=True;TrustServerCertificate=True");
+                     //"Server=(localdb)\\ProjectModels;Database=ELearning;Trusted_Connection=True;TrustServerCertificate=True");
             return new ELearningDbContext(optionsBuilder.Options, null);
         }
     }

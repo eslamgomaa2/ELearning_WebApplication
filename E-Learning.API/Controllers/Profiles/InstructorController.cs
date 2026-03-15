@@ -26,7 +26,7 @@ namespace E_Learning.API.Controllers.Profiles
             return StatusCode((int)response.HttpStatusCode, response);
         }*/
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateInstructorProfile(Guid userId, [FromForm] CreateInstructorProfileDto dto)
+        public async Task<IActionResult> UpdateInstructorProfile(Guid userId, [FromForm] UpdateInstructorProfileDto dto)
         {
             var response = await _instructorService.UpdateInstructorProfile(userId, dto);
             return StatusCode((int)response.HttpStatusCode, response);

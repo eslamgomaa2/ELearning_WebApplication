@@ -15,7 +15,7 @@ namespace E_Learning.Service.Mapping
         public InstructorProfileMapping()
         {
 
-            CreateMap<CreateInstructorProfileDto, InstructorProfile>();
+            CreateMap<UpdateInstructorProfileDto, InstructorProfile>();
 
 
             CreateMap<InstructorProfile, InstructorProfileResponseDto>()
@@ -36,10 +36,12 @@ namespace E_Learning.Service.Mapping
                            opt => opt.MapFrom(src => src.AppUser.PhoneNumber))
 
                 .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture));
-
-
-
-
+              
         }
+
+
+
+
     }
-}
+    }
+

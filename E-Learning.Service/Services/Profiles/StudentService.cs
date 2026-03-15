@@ -10,7 +10,7 @@ using E_Learning.Service.Contract;
 using E_Learning.Service.DTOs.Profiles.Admin;
 using E_Learning.Service.DTOs.Profiles.Student;
 using Microsoft.AspNetCore.Http;
-
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +27,8 @@ namespace E_Learning.Service.Services.Profiles
         private readonly IMapper _mapper;
         private readonly ResponseHandler _responseHandler;
         private readonly IFileService _fileService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
         public StudentService(
             IStudentProfileRepository studentProfileRepository,
@@ -34,7 +36,11 @@ namespace E_Learning.Service.Services.Profiles
             IUnitOfWork unit,
             IMapper mapper,
             ResponseHandler responseHandler,
-            IFileService fileService)
+            IFileService fileService,
+            UserManager<ApplicationUser>userManager,
+            RoleManager<IdentityRole<Guid>> roleManager
+
+            )
         {
             _studentProfileRepository = studentProfileRepository;
             _genericRepository = genericRepository;
@@ -42,10 +48,12 @@ namespace E_Learning.Service.Services.Profiles
             _mapper = mapper;
             _responseHandler = responseHandler;
             _fileService = fileService;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // ================= Create Student Profile =================
-        public async Task<Response<StudentProfileResponseDto>> CreateStudentProfile(CreateStudentProfileDto dto, CancellationToken ct = default)
+       /* public async Task<Response<StudentProfileResponseDto>> CreateStudentProfile(UpdateStudentProfileDto dto, CancellationToken ct = default)
         {
             // 1️⃣ إنشاء الـ ApplicationUser جديد
             var user = new ApplicationUser
@@ -84,13 +92,28 @@ namespace E_Learning.Service.Services.Profiles
             var resultDto = _mapper.Map<StudentProfileResponseDto>(profile);
             return _responseHandler.Created(resultDto);
         }
-
+       */
         // ================= Update Student Profile =================
-        public async Task<Response<StudentProfileResponseDto>> UpdateStudentProfile(Guid userId, CreateStudentProfileDto dto)
+        public async Task<Response<StudentProfileResponseDto>> UpdateStudentProfile(Guid userId, UpdateStudentProfileDto dto)
         {
             var profile = await _studentProfileRepository.GetStudentProfileWithUserByUserIdAsync(userId);
             if (profile == null)
                 return _responseHandler.NotFound<StudentProfileResponseDto>("Student profile not found");
+            var user = profile.AppUser;
+           
+
+            if (!string.IsNullOrEmpty(dto.Password))
+            {
+                if (await _userManager.HasPasswordAsync(user))
+                {
+                   
+                    await _userManager.RemovePasswordAsync(user);
+                }
+           
+                await _userManager.AddPasswordAsync(user, dto.Password);
+            }
+
+
             if (!string.IsNullOrEmpty(profile.ProfilePicture))
             {
                 var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
@@ -113,6 +136,8 @@ namespace E_Learning.Service.Services.Profiles
             await _unit.SaveChangesAsync();
 
             var resultDto = _mapper.Map<StudentProfileResponseDto>(profile);
+        
+            resultDto.Password = dto.Password;
             return _responseHandler.Success(resultDto);
         }
 

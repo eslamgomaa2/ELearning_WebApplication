@@ -13,7 +13,7 @@ namespace E_Learning.Service.Mapping
         public StudentProfileMapping()
         {
           
-            CreateMap<CreateStudentProfileDto, StudentProfile>();
+            CreateMap<UpdateStudentProfileDto, StudentProfile>();
 
            
             CreateMap<StudentProfile, StudentProfileResponseDto>()

@@ -100,7 +100,10 @@ namespace E_Learning.API
             builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(AdminProfileMapping).Assembly);
             builder.Services.AddAutoMapper(typeof(AcademicMappingProfile).Assembly);
-
+            builder.Services.AddAutoMapper(typeof(AdminProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(InstructorProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(StudentProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
             // ResponseHandler
