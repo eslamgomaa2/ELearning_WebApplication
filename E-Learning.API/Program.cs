@@ -1,8 +1,9 @@
-﻿
-using E_learning.API.Extensions;
+﻿using E_learning.API.Extensions;
 using E_learning.Core.Entities.Identity;
 using E_learning.Repository.Interceptors;
 using E_Learning.API.Extensions;
+using E_Learning.API.Hubs;  // NotificationHub
+using E_Learning.API.Services;
 using E_Learning.Core.Base;
 using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Enrollments;
@@ -119,20 +120,76 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
-            // Add services to the container.
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
 
-            // AddApplicationServices
+            builder.Services.AddSignalR();
+
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "http://localhost:3000",   // React
+                            "http://localhost:4200",   // Angular
+                            "http://localhost:5173"    // Vite
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+            // AddApplicationServices (repositories + services)
             builder.Services.AddApplicationServices(builder.Configuration);
+
+
+
+            // ══════════════════════════════════════════════════════
+            // ═══════════ JWT Authentication Registration ══════════
+            // ══════════════════════════════════════════════════════
+
+            builder.Services.AddJwtAuthentication(builder.Configuration);
+
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Enter your JWT token"
+                });
+
+                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+            });
+
             builder.Services.AddSignalR();
                
             var app = builder.Build();
+
             // ─── Migration & Seeding ─────────────────────
-            await app.MigrateDatabaseAsync();
-            // Configure the HTTP request pipeline.
+            // await app.MigrateDatabaseAsync();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -141,11 +198,18 @@ namespace E_Learning.API
 
             app.UseHttpsRedirection();
 
+
+            app.UseCors("AllowFrontend");
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseStaticFiles();
 
             app.MapControllers();
             app.MapHub<LiveSessionHub>("/liveSessionHub");
+
+
+            app.MapHub<NotificationHub>("/hubs/notifications");
 
             app.Run();
         }
