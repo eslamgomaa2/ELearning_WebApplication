@@ -33,6 +33,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using E_Learning.Repository.Repositories.GenericesRepositories;
 using E_Learning.API.Extensions;
+using E_Learning.Service.Contract.Exam;
+using E_Learning.core.Interfaces.Repositories.Assessments.Exams;
+using E_Learning.Repository.Repositories.GenericesRepositories.Assessments.Exams;
+using E_Learning.Service.Services.ExamService;
 
 namespace E_Learning.API
 {
@@ -85,6 +89,7 @@ namespace E_Learning.API
             builder.Services.AddScoped<IAdminProfileRepository, AdminProfileRepository>();
             builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
             builder.Services.AddScoped<IStudentProfileRepository, StudentProfileRepository>();
+            builder.Services.AddScoped<IExamRepository,ExamRepository>();
 
 
 
@@ -94,6 +99,8 @@ namespace E_Learning.API
             builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(AdminProfileMapping).Assembly);
             builder.Services.AddAutoMapper(typeof(AcademicMappingProfile).Assembly);
+            builder.Services.AddAutoMapper(typeof(ExamProfile).Assembly);
+
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
@@ -114,6 +121,8 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
+            builder.Services.AddScoped<IExamService, ExamService>();
+
             // Add services to the container.
 
             // AddApplicationServices

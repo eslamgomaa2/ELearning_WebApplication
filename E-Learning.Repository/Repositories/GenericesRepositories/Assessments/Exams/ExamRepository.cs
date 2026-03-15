@@ -19,5 +19,22 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Assessments.E
             return await _context.Exams.Where(e => e.CourseId == courseId)
                 .Include(e => e.Course).ToListAsync();
         }
+        public async Task<IEnumerable<Exam>> GetAllAsync()
+        {
+            return await _context.Exams
+                .Include(e => e.Course)
+                .Include(e => e.Questions)
+                .Include(e => e.Attempts)
+                .ToListAsync();
+        }
+
+        public async Task<Exam?> GetByIdAsync(int id)
+        {
+            return await _context.Exams
+                .Include(e => e.Course)
+                .Include(e => e.Questions)
+                .Include(e => e.Attempts)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
     }
 }
