@@ -117,8 +117,9 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
-            // Add services to the container.
-
+            // CourseService
+            builder.Services.AddScoped<ICourseContentService, CourseContentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
             // AddApplicationServices
             builder.Services.AddApplicationServices(builder.Configuration);
             builder.Services.AddControllers();
