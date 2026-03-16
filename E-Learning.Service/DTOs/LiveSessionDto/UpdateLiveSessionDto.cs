@@ -2,9 +2,6 @@ namespace E_Learning.Service.DTOs.LiveSessionDto
 {
     public class UpdateLiveSessionDto
     {
-        // نحتاج الـ Id عشان نحدد أي جلسة بدنا نعدل
-
-        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime ScheduledAt { get; set; }
