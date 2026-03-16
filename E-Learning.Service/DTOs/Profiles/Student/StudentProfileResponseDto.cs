@@ -19,5 +19,6 @@ namespace E_Learning.Service.DTOs.Profiles.Student
         public DateTime MemberSince { get; set; }
         public decimal EngagementRate { get; set; } 
         public int? LevelId { get; set; }
+        
     }
 }

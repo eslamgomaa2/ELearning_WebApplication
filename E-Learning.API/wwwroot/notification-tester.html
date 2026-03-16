@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Hub Tester</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+        h1 { color: #00d4ff; margin-bottom: 20px; font-size: 22px; }
+        h3 { color: #00d4ff; margin: 15px 0 8px; font-size: 16px; }
+
+        .section { background: #16213e; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        .status { padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: bold; font-size: 14px; }
+        .connected { background: #0f5132; color: #75e6a0; }
+        .disconnected { background: #5c1a1a; color: #f08080; }
+
+        input, button { padding: 8px 14px; border-radius: 6px; border: 1px solid #333; font-size: 14px; }
+        input { background: #0f3460; color: #eee; width: 100%; margin-bottom: 8px; }
+        button { background: #00d4ff; color: #000; font-weight: bold; cursor: pointer; border: none; margin: 4px; }
+        button:hover { background: #00b8d9; }
+        button.danger { background: #e74c3c; color: #fff; }
+        button.danger:hover { background: #c0392b; }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        .log { background: #0a0a1a; border-radius: 6px; padding: 12px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 13px; line-height: 1.6; }
+        .log-entry { padding: 4px 0; border-bottom: 1px solid #1a1a3e; }
+        .log-time { color: #888; }
+        .log-event { color: #00d4ff; font-weight: bold; }
+        .log-data { color: #75e6a0; }
+        .log-error { color: #f08080; }
+
+        .badge { background: #e74c3c; color: #fff; border-radius: 50%; padding: 2px 8px; font-weight: bold; font-size: 14px; }
+        .flex { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+
+<h1>Notification Hub Tester</h1>
+
+<!-- Connection Section -->
+<div class="section">
+    <h3>1. Connect to Hub</h3>
+    <input type="text" id="token" placeholder="Paste your JWT token here...">
+    <input type="text" id="hubUrl" value="/hubs/notifications" placeholder="Hub URL">
+    <div class="flex">
+        <button onclick="connect()">Connect</button>
+        <button class="danger" onclick="disconnect()">Disconnect</button>
+        <span id="status" class="status disconnected">Disconnected</span>
+        <span>Unread: <span id="unreadBadge" class="badge">0</span></span>
+    </div>
+</div>
+
+<!-- REST API Test Section -->
+<div class="section">
+    <h3>2. Test REST APIs (needs token)</h3>
+    <div class="flex">
+        <button onclick="getNotifications()">GET Notifications</button>
+        <button onclick="getUnreadCount()">GET Unread Count</button>
+        <button onclick="markAllRead()">Mark All Read</button>
+    </div>
+    <div class="flex" style="margin-top: 8px;">
+        <input type="number" id="notifId" placeholder="Notification ID" style="width: 160px;">
+        <button onclick="markOneRead()">Mark Read</button>
+        <button class="danger" onclick="deleteOne()">Delete</button>
+    </div>
+</div>
+
+<!-- Log Section -->
+<div class="section">
+    <h3>3. Real-Time Events Log</h3>
+    <button onclick="clearLog()">Clear Log</button>
+    <div id="log" class="log" style="margin-top: 8px;"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    let connection = null;
+    const logEl = document.getElementById("log");
+
+    function log(event, data, isError = false) {
+        const time = new Date().toLocaleTimeString();
+        const cls = isError ? "log-error" : "log-data";
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-event">${event}</span> <span class="${cls}">${typeof data === "object" ? JSON.stringify(data, null, 2) : data}</span>`;
+        logEl.prepend(entry);
+    }
+
+    function clearLog() { logEl.innerHTML = ""; }
+
+    function setStatus(connected) {
+        const el = document.getElementById("status");
+        el.textContent = connected ? "Connected" : "Disconnected";
+        el.className = "status " + (connected ? "connected" : "disconnected");
+    }
+
+    async function connect() {
+        const token = document.getElementById("token").value.trim();
+        const hubUrl = document.getElementById("hubUrl").value.trim();
+
+        if (!token) { log("ERROR", "Paste your JWT token first!", true); return; }
+
+        try {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(hubUrl, { accessTokenFactory: () => token })
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            // Listen to all events
+            connection.on("ReceiveNotification", (notification) => {
+                log("ReceiveNotification", notification);
+            });
+
+            connection.on("UpdateUnreadCount", (count) => {
+                document.getElementById("unreadBadge").textContent = count;
+                log("UpdateUnreadCount", count);
+            });
+
+            connection.on("NotificationRead", (id) => {
+                log("NotificationRead", { notificationId: id });
+            });
+
+            connection.on("AllNotificationsRead", () => {
+                log("AllNotificationsRead", "All marked as read");
+            });
+
+            connection.on("NotificationDeleted", (id) => {
+                log("NotificationDeleted", { notificationId: id });
+            });
+
+            connection.onreconnecting(() => { log("CONNECTION", "Reconnecting..."); setStatus(false); });
+            connection.onreconnected(() => { log("CONNECTION", "Reconnected!"); setStatus(true); });
+            connection.onclose(() => { log("CONNECTION", "Closed"); setStatus(false); });
+
+            await connection.start();
+            setStatus(true);
+            log("CONNECTION", "Connected successfully!");
+
+        } catch (err) {
+            log("ERROR", err.toString(), true);
+            setStatus(false);
+        }
+    }
+
+    async function disconnect() {
+        if (connection) {
+            await connection.stop();
+            connection = null;
+            setStatus(false);
+            log("CONNECTION", "Disconnected by user");
+        }
+    }
+
+    // REST API helpers
+    function getHeaders() {
+        const token = document.getElementById("token").value.trim();
+        return { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+    }
+
+    function getBaseUrl() {
+        return window.location.origin;
+    }
+
+    async function getNotifications() {
+        try {
+            const res = await fetch(getBaseUrl() + "/api/notifications?page=1&pageSize=10", { headers: getHeaders() });
+            const data = await res.json();
+            log("GET /api/notifications", data);
+        } catch (err) { log("ERROR", err.toString(), true); }
+    }
+
+    async function getUnreadCount() {
+        try {
+            const res = await fetch(getBaseUrl() + "/api/notifications/unread-count", { headers: getHeaders() });
+            const data = await res.json();
+            log("GET /api/notifications/unread-count", data);
+        } catch (err) { log("ERROR", err.toString(), true); }
+    }
+
+    async function markOneRead() {
+        const id = document.getElementById("notifId").value;
+        if (!id) { log("ERROR", "Enter notification ID", true); return; }
+        try {
+            const res = await fetch(getBaseUrl() + `/api/notifications/${id}/read`, { method: "PUT", headers: getHeaders() });
+            const data = await res.json();
+            log(`PUT /api/notifications/${id}/read`, data);
+        } catch (err) { log("ERROR", err.toString(), true); }
+    }
+
+    async function markAllRead() {
+        try {
+            const res = await fetch(getBaseUrl() + "/api/notifications/read-all", { method: "PUT", headers: getHeaders() });
+            const data = await res.json();
+            log("PUT /api/notifications/read-all", data);
+        } catch (err) { log("ERROR", err.toString(), true); }
+    }
+
+    async function deleteOne() {
+        const id = document.getElementById("notifId").value;
+        if (!id) { log("ERROR", "Enter notification ID", true); return; }
+        try {
+            const res = await fetch(getBaseUrl() + `/api/notifications/${id}`, { method: "DELETE", headers: getHeaders() });
+            const data = await res.json();
+            log(`DELETE /api/notifications/${id}`, data);
+        } catch (err) { log("ERROR", err.toString(), true); }
+    }
+</script>
+
+</body>
+</html>

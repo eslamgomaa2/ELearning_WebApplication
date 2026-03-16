@@ -18,6 +18,6 @@ namespace E_Learning.Service.Services.Profiles
         Task<Response<bool>> StudentProfileExists(Guid userId);
         Task<Response<IEnumerable<StudentProfileResponseDto>>> GetAllStudents();
         Task<Response<StudentProfileResponseDto>> DeleteStudentProfile(Guid userId);
-        Task<Response<string>> UploadProfilePicture(Guid userId, IFormFile file);
+
     }
 }

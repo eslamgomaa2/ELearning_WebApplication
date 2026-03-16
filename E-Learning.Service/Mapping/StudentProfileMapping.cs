@@ -34,7 +34,10 @@ namespace E_Learning.Service.Mapping
                            opt => opt.MapFrom(src => src.AppUser.PhoneNumber))
 
                 .ForMember(dest => dest.MemberSince,
-                           opt => opt.MapFrom(src => src.AppUser.MemberSince));
+                           opt => opt.MapFrom(src => src.AppUser.MemberSince))
+                .ForMember(dest => dest.ProfilePicture, 
+                         opt => opt.MapFrom(src => src.ProfilePicture));
         }
     }
-}
+    }
+

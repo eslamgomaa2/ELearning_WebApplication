@@ -6,6 +6,7 @@ using E_Learning.Core.Interfaces.Repositories;
 using E_Learning.Core.Interfaces.Repositories.Profile;
 using E_Learning.Core.Repository;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
+using E_Learning.Service.Contract;
 using E_Learning.Service.DTOs.Profiles.Admin;
 using E_Learning.Service.DTOs.Profiles.Instructor;
 using Microsoft.AspNetCore.Http;
@@ -24,57 +25,66 @@ namespace E_Learning.Service.Services.Profiles
         private readonly IUnitOfWork _unit;
         private readonly IMapper _mapper;
         private readonly ResponseHandler _responseHandler;
+        private readonly IFileService _fileService;
 
         public InstructorService(
             IInstructorProfileRepository instructorProfileRepository,
             IGenericRepository<ApplicationUser, Guid> genericRepository,
             IUnitOfWork unit,
             IMapper mapper,
-            ResponseHandler responseHandler)
+            ResponseHandler responseHandler,
+            IFileService fileService)
         {
             _instructorProfileRepository = instructorProfileRepository;
             _genericRepository = genericRepository;
             _unit = unit;
             _mapper = mapper;
             _responseHandler = responseHandler;
+            _fileService = fileService;
         }
 
         // ================= Create Instructor Profile =================
         // CreateInstructorProfile
-        public async Task<Response<InstructorProfileResponseDto>> CreateInstructorProfile(CreateInstructorProfileDto dto, CancellationToken ct = default)
-        {
-          
-            var user = new ApplicationUser
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                UserName = dto.Email, 
-                PhoneNumber = dto.phoneNumber,
-                IsActive = true,
-                MemberSince = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+        /*  public async Task<Response<InstructorProfileResponseDto>> CreateInstructorProfile(CreateInstructorProfileDto dto, CancellationToken ct = default)
+          {
 
-            await _genericRepository.AddAsync(user);
-            await _unit.SaveChangesAsync(ct);
+              var user = new ApplicationUser
+              {
+                  FullName = dto.FullName,
+                  Email = dto.Email,
+                  UserName = dto.Email, 
+                  PhoneNumber = dto.phoneNumber,
+                  IsActive = true,
+                  MemberSince = DateTime.UtcNow,
+                  UpdatedAt = DateTime.UtcNow
+              };
 
-            // 2️⃣ إنشاء InstructorProfile
-            var profile = new InstructorProfile
-            {
-                AppUserId = user.Id,
-                Bio = dto.Bio,
-                Location = dto.Location
-            };
+              await _genericRepository.AddAsync(user);
+              await _unit.SaveChangesAsync(ct);
 
-            await _instructorProfileRepository.AddAsync(profile); 
-            await _unit.SaveChangesAsync(ct);
+              string imagePath = null;
 
-           
-            var resultDto = _mapper.Map<InstructorProfileResponseDto>(profile);
-            return _responseHandler.Created(resultDto);
-        }
+              if (dto.ProfilePicture != null)
+              {
+                  imagePath = await _fileService.UploadFileAsync<InstructorProfile>(dto.ProfilePicture, "images/Instructors");
+              }
+              var profile = new InstructorProfile
+              {
+                  AppUserId = user.Id,
+                  Bio = dto.Bio,
+                  Location = dto.Location,
+                  ProfilePicture = imagePath
+              };
+
+              await _instructorProfileRepository.AddAsync(profile); 
+              await _unit.SaveChangesAsync(ct);
 
 
+              var resultDto = _mapper.Map<InstructorProfileResponseDto>(profile);
+              return _responseHandler.Created(resultDto);
+          }
+
+          */
 
 
         // ================= Update Instructor Profile =================
@@ -85,12 +95,22 @@ namespace E_Learning.Service.Services.Profiles
             if (profile == null)
                 return _responseHandler.NotFound<InstructorProfileResponseDto>("Instructor profile not found");
 
+            if (!string.IsNullOrEmpty(profile.ProfilePicture))
+            {
+                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
+                if (File.Exists(oldPath))
+                    File.Delete(oldPath);
+            }
+            var imagePath = await _fileService.UploadFileAsync<InstructorProfile>(dto.ProfilePicture, "images/Instructors");
+           
+
             profile.AppUser.FullName = dto.FullName;
             profile.AppUser.Email = dto.Email;
             profile.AppUser.PhoneNumber = dto.phoneNumber;
 
             profile.Bio = dto.Bio;
             profile.Location = dto.Location;
+            profile.ProfilePicture = imagePath;
 
             await _unit.SaveChangesAsync();
 
@@ -140,45 +160,6 @@ namespace E_Learning.Service.Services.Profiles
             return _responseHandler.Deleted<InstructorProfileResponseDto>("Instructor profile deleted successfully");
         }
 
-        // ================= Upload Profile Picture =================
-        public async Task<Response<string>> UploadProfilePicture(Guid userId, IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return _responseHandler.BadRequest<string>("No file uploaded");
-
-            var profile = await _instructorProfileRepository.GetInstructorProfileWithUserByUserIdAsync(userId);
-
-            if (profile == null)
-                return _responseHandler.NotFound<string>("Instructor profile not found");
-
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/instructors");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var fileExtension = Path.GetExtension(file.FileName);
-            var fileName = $"{userId}_{Guid.NewGuid()}{fileExtension}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            if (!string.IsNullOrEmpty(profile.ProfilePicture))
-            {
-                var oldPath = Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "wwwroot",
-                    profile.ProfilePicture.TrimStart('/')
-                );
-
-                if (File.Exists(oldPath))
-                    File.Delete(oldPath);
-            }
-
-            profile.ProfilePicture = $"/images/instructors/{fileName}";
-            await _unit.SaveChangesAsync();
-
-            return _responseHandler.Success(profile.ProfilePicture);
-        }
+        
     }
 }

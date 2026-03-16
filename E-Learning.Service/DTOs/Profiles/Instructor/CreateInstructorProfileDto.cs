@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,6 @@ namespace E_Learning.Service.DTOs.Profiles.Instructor
         public string phoneNumber { get; set; }
         public string Bio { get; set; }
         public string Location { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
     }
 }

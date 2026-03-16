@@ -21,13 +21,13 @@ namespace E_Learning.API.Controllers.Profiles
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateStudentProfileDto dto)
+        public async Task<IActionResult> CreateInstructorProfile([FromForm] CreateStudentProfileDto dto)
         {
             var response = await _studentService.CreateStudentProfile(dto);
             return StatusCode((int)response.HttpStatusCode, response);
         }
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateStudentProfile(Guid userId, [FromBody] CreateStudentProfileDto dto)
+        public async Task<IActionResult> UpdateStudentProfile(Guid userId, [FromForm] CreateStudentProfileDto dto)
         {
             var response = await _studentService.UpdateStudentProfile(userId, dto);
             return StatusCode((int)response.HttpStatusCode, response);
@@ -40,12 +40,12 @@ namespace E_Learning.API.Controllers.Profiles
             return StatusCode((int)response.HttpStatusCode, response);
         }
 
-        [HttpGet("exists/{userId}")]
+        /*[HttpGet("exists/{userId}")]
         public async Task<IActionResult> StudentProfileExists(Guid userId)
         {
             var response = await _studentService.StudentProfileExists(userId);
             return StatusCode((int)response.HttpStatusCode, response);
-        }
+        }*/
 
         [HttpGet("all")]
         public async Task<IActionResult> GetAllStudents()
@@ -61,20 +61,6 @@ namespace E_Learning.API.Controllers.Profiles
             return StatusCode((int)response.HttpStatusCode, response);
         }
 
-        [HttpPost("upload-profile-picture")]
        
-        public async Task<IActionResult> UploadProfilePicture(IFormFile file)
-        {
-            if (file == null)
-                return BadRequest("No file uploaded");
-
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-                return BadRequest("User not identified");
-
-            var response = await _studentService.UploadProfilePicture(Guid.Parse(userIdClaim), file);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }
-
     }
 }

@@ -15,5 +15,6 @@ namespace E_Learning.Service.DTOs.Profiles.Admin
         public string PhoneNumber { get; set; }
         public bool IsSuperAdmin { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? ProfilePicture { get; set; }
     }
 }
