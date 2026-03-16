@@ -22,7 +22,7 @@ namespace E_Learning.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("session/{sessionId}")]
+        [HttpGet("Attendees/{sessionId}")]
         public async Task<IActionResult> GetAttendeesBySession(int sessionId, CancellationToken ct)
         {
             var response = await _attendeeService.GetAttendeesBySessionIdAsync(sessionId, ct);

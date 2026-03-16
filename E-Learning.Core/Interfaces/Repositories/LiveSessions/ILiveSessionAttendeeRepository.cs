@@ -1,5 +1,6 @@
 ﻿using E_Learning.Core.Base;
 using E_Learning.Core.Entities.LiveSessions;
+using E_Learning.Core.Entities.Profiles;
 
 namespace E_Learning.Core.Interfaces.Repositories.LiveSessions
 
@@ -10,5 +11,9 @@ namespace E_Learning.Core.Interfaces.Repositories.LiveSessions
 
         Task<bool> IsStudentEnrolledAsync(int sessionId, Guid studentId, CancellationToken ct = default);
 
-        Task<IReadOnlyList<LiveSessionAttendee>> GetAttendeesBySessionIdAsync(int sessionId, CancellationToken ct = default);    }
+        Task<IReadOnlyList<LiveSessionAttendee>> GetAttendeesBySessionIdAsync(int sessionId, CancellationToken ct = default);  
+          public IQueryable<StudentProfile> GetTableNoTracking();
+      
+       
+          }
 }
