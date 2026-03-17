@@ -1,39 +1,6 @@
-﻿
-using E_learning.API.Extensions;
-using E_learning.Core.Entities.Identity;
-using E_learning.Repository.Interceptors;
-using E_Learning.API.Extensions;
-using E_Learning.Core.Base;
-using E_Learning.Core.Interfaces.Repositories;
-using E_Learning.Core.Interfaces.Repositories.Enrollments;
-using E_Learning.Core.Interfaces.Repositories.LiveSessions;
-using E_Learning.Core.Interfaces.Repositories.Profile;
-using E_Learning.Core.Interfaces.Services.Academic;
-using E_Learning.Core.Interfaces.Services.Courses;
-using E_Learning.Core.Interfaces.Services.Enrollments;
-using E_Learning.Core.Interfaces.Services.Reviews_Certificates;
-using E_Learning.Core.Repository;
-using E_Learning.Repository.Data;
-using E_Learning.Repository.Repositories;
-using E_Learning.Repository.Repositories.GenericesRepositories;
-using E_Learning.Repository.Repositories.GenericesRepositories.Enrollments;
-using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
-using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
-using E_Learning.Service.Contract;
-using E_Learning.Service.Contract.Assignments;
-using E_Learning.Service.Contract.Notifications;
-using E_Learning.Service.Mapping;
-using E_Learning.Service.Services;
-using E_Learning.Service.Services.Academic;
-using E_Learning.Service.Services.Academic.Stage;
-using E_Learning.Service.Services.AssignmentService;
-using E_Learning.Service.Services.Courses;
-using E_Learning.Service.Services.Enrollments;
-using E_Learning.Service.Services.LiveSessionServices;
-using E_Learning.Service.Services.Notifications;
-using E_Learning.Service.Services.Profiles;
-using E_Learning.Service.Services.Reviews_Certificates;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -89,6 +56,10 @@ namespace E_Learning.API
             builder.Services.AddScoped<IInstructorProfileRepository, InstructorProfileRepository>();
             builder.Services.AddScoped<IStudentProfileRepository, StudentProfileRepository>();
             builder.Services.AddScoped<ICertificateServices, CertificateServices>();
+            builder.Services.AddScoped<IExamAttemptServices, ExamAttemptServices>();
+            builder.Services.AddScoped<IExamServices,ExamServices>();
+            builder.Services.AddScoped<IExamQuestionServices,ExamQuestionServices>();
+            builder.Services.AddScoped<IExamAttemptAnswerServices,ExamAttemptAnswerServices>();
 
 
             //// Auto Mapper
@@ -102,22 +73,8 @@ namespace E_Learning.API
             // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
             // ResponseHandler
             builder.Services.AddTransient<ResponseHandler>();
-            // Stage & Level Services
-            builder.Services.AddScoped<IStageService, StageService>();
-            builder.Services.AddScoped<ILevelService, LevelService>();
-            // Enrollment Services
-            builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
-            builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
-            builder.Services.AddScoped<IAssignmentService, AssignmentService>();
-            builder.Services.AddScoped<IAssignmentSubmissionService, AssignmentSubmissionService>();
-            builder.Services.AddScoped<IFileService, FileService>();
-            // Enrollment Repositories
-            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
-            builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
-            // Notifications Services
-            builder.Services.AddScoped<INotificationService, NotificationService>();
-            builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
-            // Add services to the container.
+            builder.Services.AddApplicationServices();
+
 
             // AddApplicationServices
             builder.Services.AddApplicationServices(builder.Configuration);
@@ -127,6 +84,16 @@ namespace E_Learning.API
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+            //Add fake data
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                var context = services.GetRequiredService<ELearningDbContext>();
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+                await DbSeeder.SeedAsync(context, userManager);
+            }
             // ─── Migration & Seeding ─────────────────────
             await app.MigrateDatabaseAsync();
             // Configure the HTTP request pipeline.
