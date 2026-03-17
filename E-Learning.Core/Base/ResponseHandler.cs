@@ -19,6 +19,15 @@ namespace E_Learning.Core.Base
                 Message = Message == null ? "Deleted Sucessfully" : Message
             };
         }
+        public Response<T> Forbidden<T>(string Message = null)
+        {
+            return new Response<T>()
+            {
+                HttpStatusCode = System.Net.HttpStatusCode.OK,
+                Succeeded = true,
+                Message = Message == null ? "Access denied." : Message
+            };
+        }
         public Response<T> Success<T>(T entity)
         {
             return new Response<T>()
