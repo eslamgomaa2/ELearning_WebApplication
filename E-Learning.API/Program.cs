@@ -36,6 +36,7 @@ using E_Learning.Service.Services.Notifications;
 using E_Learning.Service.Services.Profiles;
 using E_Learning.Service.Services.QuizServices;
 using E_Learning.Service.Services.Reviews_Certificates;
+using E_Learning.Service.Services.Schedule;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -126,6 +127,13 @@ namespace E_Learning.API
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<ResponseHandler>();// ← ضيف السطر ده
 
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
+            // CourseService
+            builder.Services.AddScoped<ICourseContentService, CourseContentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            // AddApplicationServices
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
+            builder.Services.AddScoped<IScheduleService, ScheduleService>();
             builder.Services.AddSignalR();
 
 
@@ -146,6 +154,7 @@ namespace E_Learning.API
             });
 
             // AddApplicationServices (repositories + services)
+
             builder.Services.AddApplicationServices(builder.Configuration);
 
 

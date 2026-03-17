@@ -16,6 +16,6 @@ namespace E_Learning.Service.DTOs.Profiles.Instructor
         public string phoneNumber { get; set; }
         public string Bio { get; set; }
         public string? ProfilePicture { get; set; }
-
+        public object ProfilePictureUrl { get; internal set; }
     }
 }
