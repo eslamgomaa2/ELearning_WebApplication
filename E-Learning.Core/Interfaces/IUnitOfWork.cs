@@ -1,5 +1,5 @@
 ﻿using E_Learning.core.Interfaces.Repositories.Assessments.Exams;
-using E_Learning.core.Interfaces.Repositories.Assessments.Quizzes;
+using E_Learning.Core.Interfaces.Repositories.Assessments.Quizzes;
 using E_Learning.core.Interfaces.Repositories.Authentications;
 using E_Learning.core.Interfaces.Repositories.Courses;
 using E_Learning.Core.Interfaces.Repositories;
@@ -49,8 +49,8 @@ namespace E_Learning.Core.Repository
         IQuizRepository Quizzes { get; }
         IQuizQuestionRepository QuizQuestions { get; }
         IQuizOptionRepository QuizOptions { get; }
-        IQuizAttemptRepository QuizAttempts { get; }
-        IQuizAttemptAnswerRepository QuizAttemptAnswers { get; }
+      
+       
         IExamRepository Exams { get; }
         IExamQuestionRepository ExamQuestions { get; }
         IExamOptionRepository ExamOptions { get; }
