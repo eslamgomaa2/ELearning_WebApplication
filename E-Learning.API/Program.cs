@@ -120,6 +120,12 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
+<<<<<<< CourseContent
+            // CourseService
+            builder.Services.AddScoped<ICourseContentService, CourseContentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            // AddApplicationServices
+=======
             builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
 
             builder.Services.AddSignalR();
@@ -142,6 +148,7 @@ namespace E_Learning.API
             });
 
             // AddApplicationServices (repositories + services)
+>>>>>>> main
             builder.Services.AddApplicationServices(builder.Configuration);
 
 
