@@ -1,7 +1,10 @@
-﻿using E_Learning.Core.Interfaces.Services.Courses;
+﻿using E_Learning.Core.Features.Courses.Queries;
+using E_Learning.Core.Interfaces.Services.Courses;
 using E_Learning.Service.DTOs.CourseDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace E_Learning.API.Controllers.Courses
 {
@@ -15,11 +18,25 @@ namespace E_Learning.API.Controllers.Courses
             _courseService = courseService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetCourses()
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin/courses")]
+        public async Task<IActionResult> GetCoursesForAdmin([FromQuery] CourseQuery query)
         {
-            var result = await _courseService.GetCoursesAsync();
-            return StatusCode((int)result.HttpStatusCode, result);
+            var result = await _courseService.GetCoursesAsync(query);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Instructor")]
+        [HttpGet("instructor/courses")]
+        public async Task<IActionResult> GetInstructorCourses([FromQuery] CourseQuery query)
+        {
+            var instructorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            query.InstructorId = Guid.Parse(instructorId!);
+
+            var result = await _courseService.GetCoursesAsync(query);
+
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

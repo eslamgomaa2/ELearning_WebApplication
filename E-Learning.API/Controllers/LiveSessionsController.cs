@@ -53,7 +53,6 @@ public class LiveSessionsController : ControllerBase
     [HttpPut("update/{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateLiveSessionDto dto, CancellationToken ct)
     {
-        dto.Id = id; 
         var response = await _liveSessionService.UpdateAsync(id, dto, ct);
         return StatusCode((int)response.HttpStatusCode, response);
     }

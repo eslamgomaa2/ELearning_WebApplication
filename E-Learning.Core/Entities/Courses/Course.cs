@@ -1,6 +1,7 @@
 ﻿using E_learning.Core.Entities.Identity;
 using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Academic;
+using E_Learning.Core.Entities.Enrollment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace E_Learning.Core.Entities.Courses
         public string? DeletedBy { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
+        public ICollection<Enrollment.Enrollment> Enrollments { get; set; } = new List<Enrollment.Enrollment>();
+        
 
     }
 }

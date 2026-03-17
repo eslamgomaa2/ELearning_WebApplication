@@ -19,14 +19,14 @@ namespace E_Learning.API.Controllers.Profiles
         }
 
 
-        [HttpPost("create")]
+       /* [HttpPost("create")]
         public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateInstructorProfileDto dto)
         {
             var response = await _instructorService.CreateInstructorProfile(dto);
             return StatusCode((int)response.HttpStatusCode, response);
-        }
+        }*/
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateInstructorProfile(Guid userId, [FromBody] CreateInstructorProfileDto dto)
+        public async Task<IActionResult> UpdateInstructorProfile(Guid userId, [FromForm] UpdateInstructorProfileDto dto)
         {
             var response = await _instructorService.UpdateInstructorProfile(userId, dto);
             return StatusCode((int)response.HttpStatusCode, response);
@@ -45,7 +45,7 @@ namespace E_Learning.API.Controllers.Profiles
             var response = await _instructorService.InstructorProfileExists(userId);
             return StatusCode((int)response.HttpStatusCode, response);
         }
-
+        
         [HttpGet("all")]
         public async Task<IActionResult> GetAllInstructors()
         {
@@ -60,18 +60,6 @@ namespace E_Learning.API.Controllers.Profiles
             return StatusCode((int)response.HttpStatusCode, response);
         }
 
-        [HttpPost("upload-profile-picture")]
-        public async Task<IActionResult> UploadProfilePicture(IFormFile file)
-        {
-            if (file == null)
-                return BadRequest("No file uploaded");
-
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-                return BadRequest("User not identified");
-
-            var response = await _instructorService.UploadProfilePicture(Guid.Parse(userIdClaim), file);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }
+       
     }
 }

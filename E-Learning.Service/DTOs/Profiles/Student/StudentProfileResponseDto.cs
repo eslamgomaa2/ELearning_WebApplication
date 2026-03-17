@@ -12,6 +12,7 @@ namespace E_Learning.Service.DTOs.Profiles.Student
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string Password { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? Location { get; set; }
         public DateOnly? DateOfBirth { get; set; }
@@ -19,5 +20,6 @@ namespace E_Learning.Service.DTOs.Profiles.Student
         public DateTime MemberSince { get; set; }
         public decimal EngagementRate { get; set; } 
         public int? LevelId { get; set; }
+        
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using E_Learning.Core.Base;
+using E_Learning.Core.Entities.Profiles;
 using E_Learning.Service.DTOs.LiveSessionDto;
+using E_Learning.Service.DTOs.LiveSessionDto.E_Learning.Service.DTOs.LiveSessionDto;
 
 namespace E_Learning.Service.Services.LiveSessionServices
 {

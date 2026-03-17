@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+
 namespace E_Learning.API
 {
     public class Program
@@ -68,7 +69,10 @@ namespace E_Learning.API
             builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile).Assembly);
             builder.Services.AddAutoMapper(typeof(AdminProfileMapping).Assembly);
             builder.Services.AddAutoMapper(typeof(AcademicMappingProfile).Assembly);
-
+            builder.Services.AddAutoMapper(typeof(AdminProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(InstructorProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(StudentProfileMapping).Assembly);
+            builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
             // ResponseHandler
@@ -77,12 +81,72 @@ namespace E_Learning.API
 
 
             // AddApplicationServices
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
+            builder.Services.AddScoped<IScheduleService, ScheduleService>();
+            builder.Services.AddSignalR();
+
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy
+                        .WithOrigins(
+                            "http://localhost:3000",   // React
+                            "http://localhost:4200",   // Angular
+                            "http://localhost:5173"    // Vite
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+            // AddApplicationServices (repositories + services)
+
             builder.Services.AddApplicationServices(builder.Configuration);
+
+
+
+            // ══════════════════════════════════════════════════════
+            // ═══════════ JWT Authentication Registration ══════════
+            // ══════════════════════════════════════════════════════
+
+            builder.Services.AddJwtAuthentication(builder.Configuration);
+
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Description = "Enter your JWT token"
+                });
 
+                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+            });
+
+            builder.Services.AddSignalR();
+               
             var app = builder.Build();
             //Add fake data
             using (var scope = app.Services.CreateScope())
@@ -95,8 +159,8 @@ namespace E_Learning.API
                 await DbSeeder.SeedAsync(context, userManager);
             }
             // ─── Migration & Seeding ─────────────────────
-            await app.MigrateDatabaseAsync();
-            // Configure the HTTP request pipeline.
+            // await app.MigrateDatabaseAsync();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -105,10 +169,18 @@ namespace E_Learning.API
 
             app.UseHttpsRedirection();
 
+
+            app.UseCors("AllowFrontend");
+            app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseStaticFiles();
 
             app.MapControllers();
+            app.MapHub<LiveSessionHub>("/liveSessionHub");
+
+
+            app.MapHub<NotificationHub>("/hubs/notifications");
 
             app.Run();
         }
