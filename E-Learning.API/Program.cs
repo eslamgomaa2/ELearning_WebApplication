@@ -115,7 +115,7 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
-            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
 
             builder.Services.AddSignalR();
 
