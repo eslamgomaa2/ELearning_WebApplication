@@ -26,7 +26,7 @@ namespace E_Learning.Core.Entities.Assessments.Quiz
         public bool ShuffleQuestions { get; set; } = true;
         public bool ShowResultsImmediately { get; set; } = true;
         public bool IsActive { get; set; } = true;
-
+        public DateTime? ScheduledAt { get; set; }
         public ICollection<QuizQuestion> Questions { get; set; }
             = new List<QuizQuestion>();
         public ICollection<QuizAttempt> Attempts { get; set; }

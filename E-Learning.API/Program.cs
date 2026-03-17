@@ -22,8 +22,8 @@ using E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
 using E_Learning.Service.Contract.Assignments;
-using E_Learning.Service.Hubs;
 using E_Learning.Service.Contract.Notifications;
+using E_Learning.Service.Hubs;
 using E_Learning.Service.Mapping;
 using E_Learning.Service.Services;
 using E_Learning.Service.Services.Academic;
@@ -35,6 +35,7 @@ using E_Learning.Service.Services.LiveSessionServices;
 using E_Learning.Service.Services.Notifications;
 using E_Learning.Service.Services.Profiles;
 using E_Learning.Service.Services.Reviews_Certificates;
+using E_Learning.Service.Services.Schedule;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -120,13 +121,14 @@ namespace E_Learning.API
             // Notifications Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
+
+            builder.Services.AddScoped<INotificationHubService, NotificationHubService>();
             // CourseService
             builder.Services.AddScoped<ICourseContentService, CourseContentService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
             // AddApplicationServices
-
             builder.Services.AddScoped<INotificationHubService, NotificationHubService>();  // ← ضيف السطر ده
-
+            builder.Services.AddScoped<IScheduleService, ScheduleService>();
             builder.Services.AddSignalR();
 
 
