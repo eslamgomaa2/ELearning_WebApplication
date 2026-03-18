@@ -3,6 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using E_Learning.API.Services;
+using E_Learning.Service.Services.Schedule;
+using E_Learning.Service.Hubs;
+using E_Learning.API.Hubs;
+using E_Learning.Service.Services.QuizServices;
 
 
 namespace E_Learning.API
@@ -61,6 +66,7 @@ namespace E_Learning.API
             builder.Services.AddScoped<IExamServices,ExamServices>();
             builder.Services.AddScoped<IExamQuestionServices,ExamQuestionServices>();
             builder.Services.AddScoped<IExamAttemptAnswerServices,ExamAttemptAnswerServices>();
+            builder.Services.AddScoped<IQuizService,QuizService>();
 
 
             //// Auto Mapper

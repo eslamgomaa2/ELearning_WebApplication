@@ -19,8 +19,8 @@ namespace E_Learning.Service.Mapping
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.AppUser.FullName))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AppUser.Email))
                 .ForMember(dest => dest.phoneNumber, opt => opt.MapFrom(src => src.AppUser.PhoneNumber))
-                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
-                .ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePicture));
+                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio));
+                //.ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePicture));
 
             // 2. Student Mapping (الطالب)
             CreateMap<StudentProfile, StudentProfileResponseDto>()
