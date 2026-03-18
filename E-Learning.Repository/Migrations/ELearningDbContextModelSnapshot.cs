@@ -1501,7 +1501,11 @@ namespace E_Learning.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Notifications_CreatedAt");
+
+                    b.HasIndex("UserId", "IsRead")
+                        .HasDatabaseName("IX_Notifications_User_IsRead");
 
                     b.ToTable("Notifications", (string)null);
                 });
@@ -2746,7 +2750,7 @@ namespace E_Learning.Repository.Migrations
             modelBuilder.Entity("E_Learning.Core.Entities.Notifications.Notification", b =>
                 {
                     b.HasOne("E_learning.Core.Entities.Identity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2757,8 +2761,8 @@ namespace E_Learning.Repository.Migrations
             modelBuilder.Entity("E_Learning.Core.Entities.Notifications.NotificationSetting", b =>
                 {
                     b.HasOne("E_learning.Core.Entities.Identity.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne("NotificationSetting")
+                        .HasForeignKey("E_Learning.Core.Entities.Notifications.NotificationSetting", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -3038,6 +3042,13 @@ namespace E_Learning.Repository.Migrations
             modelBuilder.Entity("E_Learning.Core.Entities.Support.SupportTicket", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("E_learning.Core.Entities.Identity.ApplicationUser", b =>
+                {
+                    b.Navigation("NotificationSetting");
+
+                    b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618
         }

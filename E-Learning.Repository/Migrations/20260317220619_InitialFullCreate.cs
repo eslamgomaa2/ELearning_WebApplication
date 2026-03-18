@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace E_Learning.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class EditEntity : Migration
+    public partial class InitialFullCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -1636,9 +1636,14 @@ namespace E_Learning.Repository.Migrations
                 column: "InstructorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Notifications_UserId",
+                name: "IX_Notifications_CreatedAt",
                 table: "Notifications",
-                column: "UserId");
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_User_IsRead",
+                table: "Notifications",
+                columns: new[] { "UserId", "IsRead" });
 
             migrationBuilder.CreateIndex(
                 name: "UQ_NotificationSetting_User",

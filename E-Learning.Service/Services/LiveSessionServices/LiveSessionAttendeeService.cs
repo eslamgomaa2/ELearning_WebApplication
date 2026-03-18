@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using E_Learning.Core.Base;
 using E_Learning.Core.Entities.LiveSessions;
+using E_Learning.Core.Enums;
 using E_Learning.Core.Repository;
 using E_Learning.Service.DTOs.LiveSessionDto;
-using E_Learning.Service.DTOs.LiveSessionDto.E_Learning.Service.DTOs.LiveSessionDto;
 using E_Learning.Service.Hubs;
 using E_Learning.Service.Services.Profiles; 
 using Microsoft.AspNetCore.SignalR;
@@ -37,43 +37,57 @@ namespace E_Learning.Service.Services.LiveSessionServices
             _studentService = studentService;
         }
 
-        public async Task<Response<AttendeeResponseDto>> LogAttendanceAsync(LogAttendanceDto dto, CancellationToken ct = default)
-        {
-            var alreadyLogged = await _uow.LiveSessionAttendees
-                .IsStudentEnrolledAsync(dto.SessionId, dto.StudentId, ct);
+    public async Task<Response<AttendeeResponseDto>> LogAttendanceAsync(LogAttendanceDto dto, CancellationToken ct = default)
+{
+    // 1️⃣ جلب الجلسة والتحقق من وجودها
+    var session = await _uow.LiveSessions.GetByIdAsync(dto.SessionId, ct);
+    if (session == null)
+        return _responseHandler.NotFound<AttendeeResponseDto>("Live session not found.");
 
-            if (alreadyLogged)
-                return _responseHandler.BadRequest<AttendeeResponseDto>("Student has already joined this session.");
+    // 2️⃣ التحقق من أن الجلسة حالتها Live
+    if (session.Status != LiveSessionStatus.Live)
+        return _responseHandler.BadRequest<AttendeeResponseDto>(
+            $"Cannot join session. The session is currently '{session.Status}'.");
 
-            var attendee = _mapper.Map<LiveSessionAttendee>(dto);
-            await _uow.LiveSessionAttendees.AddAsync(attendee, ct);
-            await _uow.SaveChangesAsync(ct);
+    // 3️⃣ التحقق إذا الطالب دخل قبل هيك
+    var alreadyLogged = await _uow.LiveSessionAttendees
+        .IsStudentEnrolledAsync(dto.SessionId, dto.StudentId, ct);
 
-            var attendeesList = await _uow.LiveSessionAttendees
-                .GetAttendeesBySessionIdAsync(dto.SessionId, ct);
+    if (alreadyLogged)
+        return _responseHandler.BadRequest<AttendeeResponseDto>("Student has already joined this session.");
 
-            var currentAttendee = attendeesList
-                .FirstOrDefault(x => x.StudentId == dto.StudentId);
+    // 4️⃣ تسجيل الطالب
+    var attendee = _mapper.Map<LiveSessionAttendee>(dto);
+    await _uow.LiveSessionAttendees.AddAsync(attendee, ct);
+    await _uow.SaveChangesAsync(ct);
 
-            if (currentAttendee == null)
-                return _responseHandler.NotFound<AttendeeResponseDto>("Error retrieving attendance data.");
+   // 5️⃣ جلب الحضور الحالي للطالب فقط
+var currentAttendee = (await _uow.LiveSessionAttendees
+    .GetAttendeesBySessionIdAsync(dto.SessionId, ct))
+    .FirstOrDefault(x => x.StudentId == dto.StudentId);
 
-            var studentProfileResponse = await _studentService.GetStudentProfileByUserId(dto.StudentId);
-            
-            var result = _mapper.Map<AttendeeResponseDto>(currentAttendee);
+if (currentAttendee == null)
+    return _responseHandler.NotFound<AttendeeResponseDto>("Error retrieving attendance data.");
 
-            if (studentProfileResponse.Data != null)
-            {
-                result.Student.ProfilePicture = studentProfileResponse.Data.ProfilePicture;
-                result.Student.Location = studentProfileResponse.Data.Location;
-            }
+// 6️⃣ Mapping للـ DTO مباشرة على العنصر وليس الـ IEnumerable
+var result = _mapper.Map<AttendeeResponseDto>(currentAttendee);
 
-            await _hubContext.Clients
-                .Group(dto.SessionId.ToString())
-                .SendAsync("OnStudentJoined", result);
+// 7️⃣ إضافة بيانات الـ Profile إذا موجودة
+var studentProfileResponse = await _studentService.GetStudentProfileByUserId(dto.StudentId);
 
-            return _responseHandler.Success(result);
-        }
+if (studentProfileResponse.Data != null)
+{
+    result.Student.ProfilePicture = studentProfileResponse.Data.ProfilePicture;
+    result.Student.Location = studentProfileResponse.Data.Location;
+    // أي بيانات إضافية من Profile
+}
+
+// 8️⃣ إشعار عبر SignalR
+await _hubContext.Clients
+    .Group(dto.SessionId.ToString())
+    .SendAsync("OnStudentJoined", result);
+
+return _responseHandler.Success(result);}
 
         public async Task<Response<IReadOnlyList<AttendeeResponseDto>>> GetAttendeesBySessionIdAsync(int sessionId, CancellationToken ct)
         {
@@ -99,6 +113,41 @@ namespace E_Learning.Service.Services.LiveSessionServices
             }
 
             return _responseHandler.Success(result);
+        }
+
+        public async Task<Response<AttendeeResponseDto>> LeaveSession(LeaveSessionDto dto, CancellationToken ct = default)
+        {
+             // 1️⃣ جلب الطالب الحالي في الجلسة (LeftAt == null)
+    var attendees = await _uow.LiveSessionAttendees.GetAttendeesBySessionIdAsync(dto.SessionId, ct);
+var existing = attendees.FirstOrDefault(x => x.StudentId == dto.StudentId && x.LeftAt == null);
+
+    if (existing == null)
+        return _responseHandler.BadRequest<AttendeeResponseDto>("Student is not in the session or already left.");
+
+    // 2️⃣ تعديل LeftAt وحساب المدة بالثواني
+    existing.LeftAt = DateTime.UtcNow;
+    existing.DurationSeconds = (int)(existing.LeftAt.Value - existing.JoinedAt).TotalSeconds;
+
+    // 3️⃣ حفظ التعديلات
+    _uow.LiveSessionAttendees.Update(existing); // لازم تتأكد ان الريبو فيه Update أو اعمل SaveChanges مباشرة
+    await _uow.SaveChangesAsync(ct);
+
+    // 4️⃣ جلب بيانات الطالب لتحديث الـDTO
+    var studentProfileResponse = await _studentService.GetStudentProfileByUserId(dto.StudentId);
+    var result = _mapper.Map<AttendeeResponseDto>(existing);
+
+    if (studentProfileResponse.Data != null)
+    {
+        result.Student.ProfilePicture = studentProfileResponse.Data.ProfilePicture;
+        result.Student.Location = studentProfileResponse.Data.Location;
+    }
+
+    // 5️⃣ إرسال إشعار عبر SignalR
+    await _hubContext.Clients
+        .Group(dto.SessionId.ToString())
+        .SendAsync("OnStudentLeft", result);
+
+    return _responseHandler.Success(result);
         }
     }
 }

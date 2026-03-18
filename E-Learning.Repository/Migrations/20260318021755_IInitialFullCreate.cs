@@ -5,7 +5,7 @@
 namespace E_Learning.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class CleanMigration : Migration
+    public partial class IInitialFullCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
