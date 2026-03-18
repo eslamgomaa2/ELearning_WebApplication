@@ -15,8 +15,8 @@ namespace E_Learning.API.Controllers
             _attendeeService = attendeeService;
         }
 
-        [HttpPost("enroll")]
-        public async Task<IActionResult> EnrollStudent([FromBody] LogAttendanceDto dto, CancellationToken ct)
+        [HttpPost("JoineSession")]
+        public async Task<IActionResult> JoineSession([FromBody] LogAttendanceDto dto, CancellationToken ct)
         {
             var response = await _attendeeService.LogAttendanceAsync(dto, ct);
             return Ok(response);
@@ -26,6 +26,12 @@ namespace E_Learning.API.Controllers
         public async Task<IActionResult> GetAttendeesBySession(int sessionId, CancellationToken ct)
         {
             var response = await _attendeeService.GetAttendeesBySessionIdAsync(sessionId, ct);
+            return Ok(response);
+        }
+         [HttpPost("LeaveSession")]
+        public async Task<IActionResult> LeaveSession([FromBody] LeaveSessionDto dto, CancellationToken ct = default)
+        {
+            var response = await _attendeeService.LeaveSession(dto, ct);
             return Ok(response);
         }
     }

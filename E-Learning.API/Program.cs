@@ -83,6 +83,24 @@ namespace E_Learning.API
             // builder.Services.AddAutoMapper(typeof(LiveSessionMappingProfile));
             // ResponseHandler
             builder.Services.AddTransient<ResponseHandler>();
+            // Stage & Level Services
+            builder.Services.AddScoped<IStageService, StageService>();
+            builder.Services.AddScoped<ILevelService, LevelService>();
+            // Enrollment Services
+            builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+            builder.Services.AddScoped<ILessonProgressService, LessonProgressService>();
+            builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+            builder.Services.AddScoped<IAssignmentSubmissionService, AssignmentSubmissionService>();
+            builder.Services.AddScoped<IFileService, FileService>();
+            // Enrollment Repositories
+            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+            builder.Services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
+            // Notifications Services
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<INotificationSettingService, NotificationSettingService>();
+            // CourseService
+            builder.Services.AddScoped<ICourseContentService, CourseContentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddApplicationServices();
 
 
@@ -165,7 +183,7 @@ namespace E_Learning.API
                 await DbSeeder.SeedAsync(context, userManager);
             }
             // ─── Migration & Seeding ─────────────────────
-            // await app.MigrateDatabaseAsync();
+             await app.MigrateDatabaseAsync();
 
             if (app.Environment.IsDevelopment())
             {

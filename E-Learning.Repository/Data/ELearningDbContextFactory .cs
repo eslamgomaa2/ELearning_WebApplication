@@ -11,6 +11,7 @@ namespace E_Learning.Repository.Data
 
             optionsBuilder.UseSqlServer(
                      "Server=(localdb)\\ProjectModels;Database=ELearning;Trusted_Connection=True;TrustServerCertificate=True");
+
             return new ELearningDbContext(optionsBuilder.Options, null);
         }
     }
