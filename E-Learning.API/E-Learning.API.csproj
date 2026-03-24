@@ -27,4 +27,8 @@
     <ProjectReference Include="..\E-Learning.Service\E-Learning.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\students\" />
+  </ItemGroup>
+
 </Project>
