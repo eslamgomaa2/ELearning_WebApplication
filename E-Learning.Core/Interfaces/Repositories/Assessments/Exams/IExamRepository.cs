@@ -5,6 +5,7 @@ namespace E_Learning.core.Interfaces.Repositories.Assessments.Exams
 {
     public interface IExamRepository:IGenericRepository<Exam,int>
     {
-        Task<IEnumerable<Exam>> GetExamsByCourseIdAsync(int courseId);
+        Task<Exam?> GetByIdWithQuestionsAsync(int examId, CancellationToken ct = default);
+
     }
 }

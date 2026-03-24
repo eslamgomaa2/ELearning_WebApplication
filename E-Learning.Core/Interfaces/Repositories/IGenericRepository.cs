@@ -1,4 +1,5 @@
-﻿using System;
+﻿using E_Learning.Core.Specifications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -79,5 +80,7 @@ namespace E_Learning.Core.Interfaces.Repositories
         IQueryable<TEntity> Query();
         IQueryable<TEntity> QueryNoTracking();
 
+
+        // specification
     }
 }

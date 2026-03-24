@@ -12,5 +12,6 @@ namespace E_Learning.Core.Entities.Academic
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+
     }
 }

@@ -12,8 +12,10 @@ namespace E_Learning.Service.DTOs.Profiles.Admin
         public Guid AppUserId { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }
+        public string password { get; set; }
+        public string Role { get; set; }
         public string PhoneNumber { get; set; }
-        public bool IsSuperAdmin { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? ProfilePicture { get; set; }
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions
 {
-    public class LiveSessionRepository  : ILiveSessionRepository
+    public class LiveSessionRepository : ILiveSessionRepository
     {
         public LiveSessionRepository(ELearningDbContext context)
         {
@@ -19,25 +19,34 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions
             await _context.LiveSessions.AddAsync(liveSession, ct);
         }
 
-        public async Task<IReadOnlyList<LiveSession>> GetAllAsync(CancellationToken ct = default)
+        private IQueryable<LiveSession> WithFullIncludes()
         {
-            return await _context.Set<LiveSession>().ToListAsync(ct);
+            return _context.LiveSessions
+                .Include(ls => ls.Instructor)
+                .Include(ls => ls.Course)
+                .Include(ls => ls.Attendees);
         }
 
         public async Task<LiveSession?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _context.LiveSessions
-        .FirstOrDefaultAsync(e => e.Id== id ,ct);
+            return await WithFullIncludes()
+                .FirstOrDefaultAsync(e => e.Id == id, ct);
+        }
+
+        public async Task<IReadOnlyList<LiveSession>> GetAllAsync(CancellationToken ct = default)
+        {
+            return await WithFullIncludes()
+                .ToListAsync(ct);
         }
 
         public IQueryable<LiveSession> GetTableNoTracking()
         {
-            throw new NotImplementedException();
+            return _context.LiveSessions.AsNoTracking();
         }
 
         public void SoftDelete(LiveSession liveSession)
         {
-           _context.Set<LiveSession>().Remove(liveSession);
+            _context.Set<LiveSession>().Remove(liveSession);
         }
 
         public void Update(LiveSession liveSession)
@@ -45,6 +54,6 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.LiveSessions
             _context.LiveSessions.Update(liveSession);
         }
 
-       
+
     }
 }

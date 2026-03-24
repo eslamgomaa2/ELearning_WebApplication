@@ -1,5 +1,5 @@
 ﻿using E_Learning.core.Interfaces.Repositories.Assessments.Exams;
-using E_Learning.core.Interfaces.Repositories.Assessments.Quizzes;
+using E_Learning.Core.Interfaces.Repositories.Assessments.Quizzes;
 using E_Learning.core.Interfaces.Repositories.Authentications;
 using E_Learning.core.Interfaces.Repositories.Courses;
 using E_Learning.Core.Interfaces.Repositories;
@@ -12,8 +12,10 @@ using E_Learning.Core.Interfaces.Repositories.LiveSessions;
 using E_Learning.Core.Interfaces.Repositories.Notifications;
 using E_Learning.Core.Interfaces.Repositories.Payments;
 using E_Learning.Core.Interfaces.Repositories.Profile;
+using E_Learning.Core.Interfaces.Repositories.Reviews_Certificates;
 using E_Learning.Core.Interfaces.Repositories.Schedule;
 using E_Learning.Core.Repository;
+using E_Learning.Infrastructure.Repositories;
 using E_Learning.Repository.Data;
 using E_Learning.Repository.Repositories.GenericesRepositories;
 using E_Learning.Repository.Repositories.GenericesRepositories.Academic;
@@ -29,6 +31,9 @@ using E_Learning.Repository.Repositories.GenericesRepositories.Payments;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Repository.Repositories.GenericesRepositories.Reviews_Certificates;
 using E_Learning.Repository.Repositories.GenericesRepositories.Schedule;
+
+
+
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace E_Learning.Repository.Repositories
@@ -56,8 +61,7 @@ namespace E_Learning.Repository.Repositories
         private IQuizRepository? _quizzes;
         private IQuizQuestionRepository? _quizQuestions;
         private IQuizOptionRepository? _quizOptions;
-        private IQuizAttemptRepository? _quizAttempts;
-        private IQuizAttemptAnswerRepository? _quizAttemptAnswers;
+       
         private IExamRepository? _exams;
         private IExamQuestionRepository? _examQuestions;
         private IExamOptionRepository? _examOptions;
@@ -98,8 +102,7 @@ namespace E_Learning.Repository.Repositories
         public IQuizRepository Quizzes => _quizzes ??= new QuizRepository(_context);
         public IQuizQuestionRepository QuizQuestions => _quizQuestions ??= new QuizQuestionRepository(_context);
         public IQuizOptionRepository QuizOptions => _quizOptions ??= new QuizOptionRepository(_context);
-        public IQuizAttemptRepository QuizAttempts => _quizAttempts ??= new QuizAttemptRepository(_context);
-        public IQuizAttemptAnswerRepository QuizAttemptAnswers => _quizAttemptAnswers ??= new QuizAttemptAnswerRepository(_context);
+       
         public IExamRepository Exams => _exams ??= new ExamRepository(_context);
         public IExamQuestionRepository ExamQuestions => _examQuestions ??= new ExamQuestionRepository(_context);
         public IExamOptionRepository ExamOptions => _examOptions ??= new ExamOptionRepository(_context);
