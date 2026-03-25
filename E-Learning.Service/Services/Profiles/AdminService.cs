@@ -202,7 +202,7 @@ namespace E_Learning.Service.Services.Profiles
 
             var resultDto = _mapper.Map<AdminProfileResponseDto>(profile);
             resultDto.Role = dto.Role;
-            resultDto.password = dto.Password;
+            //resultDto.password = dto.Password;
             return _responseHandler.Success(resultDto);
         }
         // ================= Get Admin Profile by UserId =================

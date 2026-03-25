@@ -1,5 +1,7 @@
-﻿using E_Learning.Service.DTOs.Profiles.Instructor;
+﻿using E_Learning.Service.DTOs.Profiles;
+using E_Learning.Service.DTOs.Profiles.Instructor;
 using E_Learning.Service.Services.Profiles;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,6 +12,7 @@ namespace E_Learning.API.Controllers.Profiles
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class InstructorController : ControllerBase
     {
         private readonly IInstructorService _instructorService;
@@ -19,15 +22,24 @@ namespace E_Learning.API.Controllers.Profiles
         }
 
 
-       /* [HttpPost("create")]
-        public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateInstructorProfileDto dto)
+        /* [HttpPost("create")]
+         public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateInstructorProfileDto dto)
+         {
+             var response = await _instructorService.CreateInstructorProfile(dto);
+             return StatusCode((int)response.HttpStatusCode, response);
+         }*/
+        //[HttpPut("{userId}")]
+        [Authorize(Roles = "Instructor")]
+
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateInstructorProfile( [FromForm] UpdateInstructorProfileDto dto)
         {
-            var response = await _instructorService.CreateInstructorProfile(dto);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }*/
-        [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateInstructorProfile(Guid userId, [FromForm] UpdateInstructorProfileDto dto)
-        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User not logged in");
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return BadRequest("Invalid user ID");
             var response = await _instructorService.UpdateInstructorProfile(userId, dto);
             return StatusCode((int)response.HttpStatusCode, response);
         }
@@ -60,6 +72,19 @@ namespace E_Learning.API.Controllers.Profiles
             return StatusCode((int)response.HttpStatusCode, response);
         }
 
-       
+        [Authorize(Roles = "Instructor")]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString))
+                return Unauthorized("User not logged in");
+
+
+            if (!Guid.TryParse(userIdString, out var userId))
+                return BadRequest("Invalid user ID");
+            var response = await _instructorService.ChangePasswordAsync(userId, dto);
+            return StatusCode((int)response.HttpStatusCode, response);
+        }
     }
 }

@@ -7,6 +7,7 @@ using E_Learning.Core.Interfaces.Repositories.Profile;
 using E_Learning.Core.Repository;
 using E_Learning.Repository.Repositories.GenericesRepositories.Profile;
 using E_Learning.Service.Contract;
+using E_Learning.Service.DTOs.Profiles;
 using E_Learning.Service.DTOs.Profiles.Admin;
 using E_Learning.Service.DTOs.Profiles.Student;
 using Microsoft.AspNetCore.Http;
@@ -97,47 +98,83 @@ namespace E_Learning.Service.Services.Profiles
         public async Task<Response<StudentProfileResponseDto>> UpdateStudentProfile(Guid userId, UpdateStudentProfileDto dto)
         {
             var profile = await _studentProfileRepository.GetStudentProfileWithUserByUserIdAsync(userId);
+            //if (profile == null)
+            //    return _responseHandler.NotFound<StudentProfileResponseDto>("Student profile not found");
             if (profile == null)
-                return _responseHandler.NotFound<StudentProfileResponseDto>("Student profile not found");
-            var user = profile.AppUser;
-           
-
-            if (!string.IsNullOrEmpty(dto.Password))
             {
-                if (await _userManager.HasPasswordAsync(user))
+                profile = new StudentProfile
                 {
-                   
-                    await _userManager.RemovePasswordAsync(user);
-                }
-           
-                await _userManager.AddPasswordAsync(user, dto.Password);
+                    AppUserId = userId,
+                    Location = dto.location,
+                    DateOfBirth = dto.DateOfBirth,
+                    ProfilePicture = null,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _studentProfileRepository.AddAsync(profile);
+                await _unit.SaveChangesAsync();
             }
-
-
-            if (!string.IsNullOrEmpty(profile.ProfilePicture))
+            var user = profile.AppUser;
+            if (user == null)
             {
-                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
-                if (File.Exists(oldPath))
-                    File.Delete(oldPath);
+                user = await _userManager.FindByIdAsync(userId.ToString());
+                profile.AppUser = user;
+                if (user == null)
+                    return _responseHandler.NotFound<StudentProfileResponseDto>("User not found");
             }
+
+            //if (!string.IsNullOrEmpty(dto.Password))
+            //{
+            //    if (await _userManager.HasPasswordAsync(user))
+            //    {
+
+            //        await _userManager.RemovePasswordAsync(user);
+            //    }
+
+            //    await _userManager.AddPasswordAsync(user, dto.Password);
+            //}
+            string imagePath;
+
+            if (dto.ProfilePicture != null)
+            {
+                if (!string.IsNullOrEmpty(profile.ProfilePicture))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
+                }
+
+                imagePath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
+            }
+            else
+            {
+                imagePath = profile.ProfilePicture;
+            }
+
+            //if (!string.IsNullOrEmpty(profile.ProfilePicture))
+            //{
+            //    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
+            //    if (File.Exists(oldPath))
+            //        File.Delete(oldPath);
+            //}
 
           
-            var newPath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
+            //var newPath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
            
-            profile.AppUser.FullName = dto.FullName;
-            profile.AppUser.Email = dto.Email;
-            profile.AppUser.PhoneNumber = dto.phoneNumber;
-            profile.AppUser.MemberSince = DateTime.UtcNow;
-            profile.Location = dto.location;
-            profile.DateOfBirth = dto.DateOfBirth;
-            profile.ProfilePicture = newPath; 
+            profile.AppUser.FullName = dto.FullName??profile.AppUser.FullName;
+            //profile.AppUser.Email = dto.Email;
+            profile.AppUser.PhoneNumber = dto.phoneNumber ?? profile.AppUser.PhoneNumber;
+            //profile.AppUser.MemberSince = DateTime.UtcNow;
+            profile.Location = dto.location??profile.Location;
+            profile.DateOfBirth = dto.DateOfBirth??profile.DateOfBirth;
+            profile.ProfilePicture = imagePath; 
 
 
             await _unit.SaveChangesAsync();
 
             var resultDto = _mapper.Map<StudentProfileResponseDto>(profile);
         
-            resultDto.Password = dto.Password;
+            //resultDto.Password = dto.Password;
             return _responseHandler.Success(resultDto);
         }
 
@@ -180,6 +217,33 @@ namespace E_Learning.Service.Services.Profiles
             return _responseHandler.Deleted<StudentProfileResponseDto>("Student profile deleted successfully");
         }
 
+        public async Task<Response<string>> ChangePasswordAsync(Guid userId, ChangePasswordDto dto)
+        {
         
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return _responseHandler.NotFound<string>("User not found");
+ 
+            if (dto.NewPassword != dto.ConfirmPassword)
+                return _responseHandler.BadRequest<string>("New password and confirmation do not match");
+ 
+            var passwordValidation = await _userManager.PasswordValidators.First().ValidateAsync(_userManager, user, dto.NewPassword);
+            if (!passwordValidation.Succeeded)
+            {
+                var errors = string.Join(", ", passwordValidation.Errors.Select(e => e.Description));
+                return _responseHandler.BadRequest<string>($"New password invalid: {errors}");
+            }
+
+          
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return _responseHandler.BadRequest<string>($"Current password incorrect or change failed: {errors}");
+            }
+
+           
+            return _responseHandler.Success("Password changed successfully");
+        }
     }
 }
