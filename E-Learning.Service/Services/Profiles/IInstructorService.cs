@@ -1,5 +1,6 @@
 ﻿using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Profiles;
+using E_Learning.Service.DTOs.Profiles;
 using E_Learning.Service.DTOs.Profiles.Instructor;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -17,6 +18,7 @@ namespace E_Learning.Service.Services.Profiles
         Task<Response<bool>> InstructorProfileExists(Guid userId);
         Task<Response<IEnumerable<InstructorProfileResponseDto>>> GetAllInstructors();
         Task<Response<InstructorProfileResponseDto>> DeleteInstructorProfile(Guid userId);
-      
+        Task<Response<string>> ChangePasswordAsync(Guid userId, ChangePasswordDto dto);
+
     }
 }

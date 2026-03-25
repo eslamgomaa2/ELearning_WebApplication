@@ -133,25 +133,41 @@ namespace E_Learning.Service.Services.Profiles
 
             //    await _userManager.AddPasswordAsync(user, dto.Password);
             //}
+            string imagePath;
 
-
-            if (!string.IsNullOrEmpty(profile.ProfilePicture))
+            if (dto.ProfilePicture != null)
             {
-                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
-                if (File.Exists(oldPath))
-                    File.Delete(oldPath);
+                if (!string.IsNullOrEmpty(profile.ProfilePicture))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
+                }
+
+                imagePath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
+            }
+            else
+            {
+                imagePath = profile.ProfilePicture;
             }
 
+            //if (!string.IsNullOrEmpty(profile.ProfilePicture))
+            //{
+            //    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.ProfilePicture.TrimStart('/'));
+            //    if (File.Exists(oldPath))
+            //        File.Delete(oldPath);
+            //}
+
           
-            var newPath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
+            //var newPath = await _fileService.UploadFileAsync<AdminProfile>(dto.ProfilePicture, "images/students");
            
-            profile.AppUser.FullName = dto.FullName;
+            profile.AppUser.FullName = dto.FullName??profile.AppUser.FullName;
             //profile.AppUser.Email = dto.Email;
-            profile.AppUser.PhoneNumber = dto.phoneNumber;
+            profile.AppUser.PhoneNumber = dto.phoneNumber ?? profile.AppUser.PhoneNumber;
             //profile.AppUser.MemberSince = DateTime.UtcNow;
-            profile.Location = dto.location;
-            profile.DateOfBirth = dto.DateOfBirth;
-            profile.ProfilePicture = newPath; 
+            profile.Location = dto.location??profile.Location;
+            profile.DateOfBirth = dto.DateOfBirth??profile.DateOfBirth;
+            profile.ProfilePicture = imagePath; 
 
 
             await _unit.SaveChangesAsync();
