@@ -21,75 +21,75 @@ namespace E_Learning.Service.Services.ExamServices.Answers
         // ─────────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts/{attemptId}/answers
         // ─────────────────────────────────────────────────────────
-        public async Task<Response<IReadOnlyList<AttemptAnswerResponseDto>>> GetByAttemptAsync(
+        public async Task<Response<IReadOnlyList<ExamAttemptAnswer>>> GetByAttemptAsync(
             int examId, int attemptId, CancellationToken ct)
         {
             // Validate attempt belongs to this exam
             var attempt = await _unitOfWork.ExamAttempts.GetByIdAsync(attemptId, ct);
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<IReadOnlyList<AttemptAnswerResponseDto>>(
+                return _responseHandler.NotFound<IReadOnlyList<ExamAttemptAnswer>>(
                     "Attempt not found.");
 
             var answers = await _unitOfWork.ExamAttemptAnswers
                 .GetByAttemptIdAsync(attemptId, ct);
 
-            var result = answers.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<AttemptAnswerResponseDto>>(result);
+            
+            return _responseHandler.Success<IReadOnlyList<ExamAttemptAnswer>>(answers);
         }
 
         // ─────────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts/{attemptId}/answers/{answerId}
         // ─────────────────────────────────────────────────────────
-        public async Task<Response<AttemptAnswerResponseDto>> GetByIdAsync(
+        public async Task<Response<ExamAttemptAnswer>> GetByIdAsync(
             int examId, int attemptId, int answerId, CancellationToken ct)
         {
             var answer = await _unitOfWork.ExamAttemptAnswers
                 .GetByIdWithDetailsAsync(answerId, ct);
 
             if (answer is null || answer.AttemptId != attemptId)
-                return _responseHandler.NotFound<AttemptAnswerResponseDto>("Answer not found.");
+                return _responseHandler.NotFound<ExamAttemptAnswer>("Answer not found.");
 
             if (answer.Attempt.ExamId != examId)
-                return _responseHandler.NotFound<AttemptAnswerResponseDto>("Answer not found.");
+                return _responseHandler.NotFound<ExamAttemptAnswer>("Answer not found.");
 
-            return _responseHandler.Success(MapToDto(answer));
+            return _responseHandler.Success(answer);
         }
 
         // ─────────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts/{attemptId}/answers/text
         // Returns only text answers that need manual grading
         // ─────────────────────────────────────────────────────────
-        public async Task<Response<IReadOnlyList<AttemptAnswerResponseDto>>> GetTextAnswersAsync(
+        public async Task<Response<IReadOnlyList<ExamAttemptAnswer>>> GetTextAnswersAsync(
             int examId, int attemptId, CancellationToken ct)
         {
             var attempt = await _unitOfWork.ExamAttempts.GetByIdAsync(attemptId, ct);
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<IReadOnlyList<AttemptAnswerResponseDto>>(
+                return _responseHandler.NotFound<IReadOnlyList<ExamAttemptAnswer>>(
                     "Attempt not found.");
 
             var answers = await _unitOfWork.ExamAttemptAnswers
                 .GetTextAnswersByAttemptAsync(attemptId, ct);
 
-            var result = answers.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<AttemptAnswerResponseDto>>(result);
+            
+            return _responseHandler.Success<IReadOnlyList<ExamAttemptAnswer>>(answers);
         }
 
         // ─────────────────────────────────────────────────────────
         // PATCH /api/exams/{examId}/attempts/{attemptId}/answers/{questionId}/grade
         // Instructor grades a single text answer
         // ─────────────────────────────────────────────────────────
-        public async Task<Response<AttemptAnswerResponseDto>> GradeAnswerAsync(
+        public async Task<Response<ExamAttemptAnswer>> GradeAnswerAsync(
             int examId, int attemptId, int questionId,
             UpdateAnswerScoreDto dto, CancellationToken ct)
         {
             // 1. Validate attempt belongs to exam
             var attempt = await _unitOfWork.ExamAttempts.GetByIdAsync(attemptId, ct);
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<AttemptAnswerResponseDto>("Attempt not found.");
+                return _responseHandler.NotFound<ExamAttemptAnswer>("Attempt not found.");
 
             // 2. Must be submitted before grading
             if (attempt.Status == ExamAttemptStatus.InProgress)
-                return _responseHandler.BadRequest<AttemptAnswerResponseDto>(
+                return _responseHandler.BadRequest<ExamAttemptAnswer>(
                     "Cannot grade an in-progress attempt.");
 
             // 3. Find the answer
@@ -97,11 +97,11 @@ namespace E_Learning.Service.Services.ExamServices.Answers
                 .GetByAttemptAndQuestionAsync(attemptId, questionId, ct);
 
             if (answer is null)
-                return _responseHandler.NotFound<AttemptAnswerResponseDto>("Answer not found.");
+                return _responseHandler.NotFound<ExamAttemptAnswer>("Answer not found.");
 
             // 4. Validate score does not exceed question points
             if (dto.Score > answer.Question.Points)
-                return _responseHandler.BadRequest<AttemptAnswerResponseDto>(
+                return _responseHandler.BadRequest< ExamAttemptAnswer>(
                     $"Score cannot exceed question points ({answer.Question.Points}).");
 
             // 5. Apply grade
@@ -117,7 +117,7 @@ namespace E_Learning.Service.Services.ExamServices.Answers
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(MapToDto(answer));
+            return _responseHandler.Success(answer);
         }
 
         // ─────────────────────────────────────────────────────────
@@ -168,20 +168,6 @@ namespace E_Learning.Service.Services.ExamServices.Answers
                 $"Graded {dto.Answers.Count} answers. Total score: {attempt.Score}.");
         }
 
-        // ─────────────────────────────────────────────────────────
-        // Private mapper
-        // ─────────────────────────────────────────────────────────
-        private static AttemptAnswerResponseDto MapToDto(ExamAttemptAnswer a) => new AttemptAnswerResponseDto()
-        {
-            
-            AttemptId = a.AttemptId,
-            QuestionId = a.QuestionId,
-            QuestionText = a.Question?.Text ?? string.Empty,
-            SelectedOptionId = a.SelectedOptionId,
-            SelectedOptionText = a.SelectedOption?.Text,
-            TextAnswer = a.TextAnswer,
-            Score = a.Score,
-            IsCorrect = a.IsCorrect,
-        };
+       
     }
 }

@@ -15,29 +15,29 @@ namespace E_Learning.Service.Services.ExamServices.Attempts
             _unitOfWork = unitOfWork;
             _responseHandler = responseHandler;
         }
-       public async Task<Response<StartAttemptResponseDto>> StartAsync(
+       public async Task<Response<ExamAttempt>> StartAsync(
     int examId, Guid studentId, CancellationToken ct)
 {
     
     var exam = await _unitOfWork.Exams.GetByIdWithQuestionsAsync(examId, ct);
     if (exam is null || !exam.IsActive)
-        return _responseHandler.NotFound<StartAttemptResponseDto>(
+        return _responseHandler.NotFound<ExamAttempt>(
             "Exam not found or not active.");
 
     if (exam.EndDateTime.HasValue && exam.EndDateTime.Value < DateTime.UtcNow)
-        return _responseHandler.BadRequest<StartAttemptResponseDto>(
+        return _responseHandler.BadRequest<ExamAttempt>(
             "Exam has already ended.");
 
     var attemptCount = await _unitOfWork.ExamAttempts
         .CountAttemptsAsync(studentId, examId, ct);
     if (attemptCount >= exam.MaxAttempts)
-        return _responseHandler.BadRequest<StartAttemptResponseDto>(
+        return _responseHandler.BadRequest<ExamAttempt>(
             $"You have reached the maximum number of attempts ({exam.MaxAttempts}).");
 
     var activeAttempt = await _unitOfWork.ExamAttempts
         .GetActiveAttemptAsync(studentId, examId, ct);
     if (activeAttempt is not null)
-        return _responseHandler.BadRequest<StartAttemptResponseDto>(
+        return _responseHandler.BadRequest< ExamAttempt>(
             "You already have an active attempt. Please submit it first.");
 
     var attempt = new ExamAttempt
@@ -83,32 +83,25 @@ namespace E_Learning.Service.Services.ExamServices.Attempts
             }).ToList()
     }).ToList();
 
-    return _responseHandler.Created(new StartAttemptResponseDto
-    {
-        AttemptId      = attempt.Id,
-        StartedAt      = attempt.StartedAt,
-        ExamEndsAt     = attempt.StartedAt.AddSeconds(exam.DurationSeconds),
-        TotalQuestions = questions.Count,
-        Questions      = questionDtos,   
-    });
+    return _responseHandler.Created(attempt);
 }
 
 
-        public async Task<Response<AttemptResponseDto>> SubmitAsync( int examId, int attemptId, Guid studentId, SubmitAttemptDto dto, CancellationToken ct)
+        public async Task<Response<ExamAttempt>> SubmitAsync( int examId, int attemptId, Guid studentId, SubmitAttemptDto dto, CancellationToken ct)
         {
             // 1. Load attempt with exam + questions + options
             var attempt = await _unitOfWork.ExamAttempts.GetByIdWithExamAsync(attemptId, ct);
 
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<AttemptResponseDto>("Attempt not found.");
+                return _responseHandler.NotFound<ExamAttempt>("Attempt not found.");
 
             // 2. Must belong to this student
             if (attempt.StudentId != studentId)
-                return _responseHandler.Forbidden<AttemptResponseDto>("Access denied.");
+                return _responseHandler.Forbidden<ExamAttempt>("Access denied.");
 
             // 3. Must still be in progress
             if (attempt.Status != ExamAttemptStatus.InProgress)
-                return _responseHandler.BadRequest<AttemptResponseDto>("Attempt already submitted.");
+                return _responseHandler.BadRequest<ExamAttempt>("Attempt already submitted.");
 
             // 4. Auto-expire check — if time ran out, mark as expired
             var deadline = attempt.StartedAt.AddSeconds(attempt.Exam.DurationSeconds);
@@ -166,69 +159,68 @@ namespace E_Learning.Service.Services.ExamServices.Attempts
 
             // Reload with full details for response
             var full = await _unitOfWork.ExamAttempts.GetByIdWithDetailsAsync(attempt.Id, ct);
-            return _responseHandler.Success(MapToDto(full!));
+            return _responseHandler.Success(full!);
         }
 
         // ─────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts/{attemptId}
         // ─────────────────────────────────────────────────────
-        public async Task<Response<AttemptResponseDto>> GetByIdAsync(
+        public async Task<Response<ExamAttempt>> GetByIdAsync(
             int examId, int attemptId, CancellationToken ct)
         {
             var attempt = await _unitOfWork.ExamAttempts.GetByIdWithDetailsAsync(attemptId, ct);
 
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<AttemptResponseDto>("Attempt not found.");
+                return _responseHandler.NotFound<ExamAttempt >("Attempt not found.");
 
-            return _responseHandler.Success(MapToDto(attempt));
+            return _responseHandler.Success(attempt);
         }
 
         // ─────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts/my
         // ─────────────────────────────────────────────────────
-        public async Task<Response<IReadOnlyList<AttemptResponseDto>>> GetMyAttemptsAsync(
+        public async Task<Response<IReadOnlyList<ExamAttempt>>> GetMyAttemptsAsync(
             int examId, Guid studentId, CancellationToken ct)
         {
             var examExists = await _unitOfWork.Exams.AnyAsync(e => e.Id == examId, ct);
             if (!examExists)
-                return _responseHandler.NotFound<IReadOnlyList<AttemptResponseDto>>("Exam not found.");
+                return _responseHandler.NotFound<IReadOnlyList<ExamAttempt>>("Exam not found.");
 
             var attempts = await _unitOfWork.ExamAttempts
                 .GetByStudentAndExamAsync(studentId, examId, ct);
 
-            var result = attempts.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<AttemptResponseDto>>(result);
+           
+            return _responseHandler.Success<IReadOnlyList<ExamAttempt>>(attempts);
         }
 
         // ─────────────────────────────────────────────────────
         // GET /api/exams/{examId}/attempts  (instructor)
         // ─────────────────────────────────────────────────────
-        public async Task<Response<IReadOnlyList<AttemptResponseDto>>> GetAllByExamAsync(
-            int examId, CancellationToken ct)
+        public async Task<Response<IReadOnlyList<ExamAttempt>>> GetAllByExamAsync(int examId,PaginationParams paginationParams, CancellationToken ct)
         {
             var examExists = await _unitOfWork.Exams.AnyAsync(e => e.Id == examId, ct);
             if (!examExists)
-                return _responseHandler.NotFound<IReadOnlyList<AttemptResponseDto>>("Exam not found.");
+                return _responseHandler.NotFound<IReadOnlyList<ExamAttempt>>("Exam not found.");
 
-            var attempts = await _unitOfWork.ExamAttempts.GetByExamIdAsync(examId, ct);
+            var attempts = await _unitOfWork.ExamAttempts.GetByExamIdAsync(examId, paginationParams,ct);
 
-            var result = attempts.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<AttemptResponseDto>>(result);
+            
+            return _responseHandler.Success<IReadOnlyList<ExamAttempt>>(attempts);
         }
 
         // ─────────────────────────────────────────────────────
         // PATCH /api/exams/{examId}/attempts/{attemptId}/review
         // ─────────────────────────────────────────────────────
-        public async Task<Response<AttemptResponseDto>> ReviewAsync(
+        public async Task<Response<ExamAttempt>> ReviewAsync(
             int examId, int attemptId, Guid reviewerId, ReviewAttemptDto dto, CancellationToken ct)
         {
             var attempt = await _unitOfWork.ExamAttempts.GetByIdWithDetailsAsync(attemptId, ct);
 
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<AttemptResponseDto>("Attempt not found.");
+                return _responseHandler.NotFound<ExamAttempt>("Attempt not found.");
 
             if (attempt.Status != ExamAttemptStatus.Submitted)
-                return _responseHandler.BadRequest<AttemptResponseDto>(
+                return _responseHandler.BadRequest<ExamAttempt>(
                     "Only submitted attempts can be reviewed.");
 
             attempt.ReviewDecision = dto.ReviewDecision;
@@ -244,57 +236,30 @@ namespace E_Learning.Service.Services.ExamServices.Attempts
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(MapToDto(attempt));
+            return _responseHandler.Success(attempt);
         }
 
         // ─────────────────────────────────────────────────────
         // PATCH /api/exams/{examId}/attempts/{attemptId}/publish
         // ─────────────────────────────────────────────────────
-        public async Task<Response<string>> PublishAsync(
+        public async Task<Response<ExamAttempt>> PublishAsync(
             int examId, int attemptId, CancellationToken ct)
         {
             var attempt = await _unitOfWork.ExamAttempts
                 .GetByIdAsync(attemptId, ct);
 
             if (attempt is null || attempt.ExamId != examId)
-                return _responseHandler.NotFound<string>("Attempt not found.");
+                return _responseHandler.NotFound<ExamAttempt>("Attempt not found.");
 
             if (attempt.IsPublished)
-                return _responseHandler.BadRequest<string>("Result already published.");
+                return _responseHandler.BadRequest<ExamAttempt>("Result already published.");
 
             attempt.IsPublished = true;
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _responseHandler.Success("Result published successfully.");
+            return _responseHandler.Success<ExamAttempt>(attempt);
         }
 
-        // ─────────────────────────────────────────────────────
-        // Private mapper
-        // ─────────────────────────────────────────────────────
-        private static AttemptResponseDto MapToDto(ExamAttempt a) => new()
-        {
-            Id = a.Id,
-            StudentId = a.StudentId,
-            StudentName = a.Student?.UserName ?? string.Empty,
-            ExamId = a.ExamId,
-            StartedAt = a.StartedAt,
-            SubmittedAt = a.SubmittedAt,
-            Score = a.Score,
-            IsPassed = a.IsPassed,
-            Status = a.Status.ToString(),
-            IsPublished = a.IsPublished,
-            TeacherComment = a.TeacherComment,
-            ReviewDecision = a.ReviewDecision,
-            Answers = a.Answers.Select(ans => new AttemptAnswerResponseDto
-            {
-                QuestionId = ans.QuestionId,
-                QuestionText = ans.Question?.Text ?? string.Empty,
-                SelectedOptionId = ans.SelectedOptionId,
-                SelectedOptionText = ans.SelectedOption?.Text,
-                TextAnswer = ans.TextAnswer,
-                IsCorrect = ans.IsCorrect,
-                Score = ans.Score,
-            }).ToList()
-        };
+       
     }
 }

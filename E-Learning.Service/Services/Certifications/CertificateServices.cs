@@ -17,59 +17,58 @@ namespace E_Learning.Service.Services.Reviews_Certificates
             _responseHandler = responseHandler;
         }
 
-        public async Task<Response<CertificateResponseDto>> GetByIdAsync(
+        public async Task<Response<Certificate>> GetByIdAsync(
             int id, CancellationToken ct = default)
         {
             var certificate = await _uow.Certificates.GetByIdAsync(id, ct);
 
             if (certificate is null)
-                return _responseHandler.NotFound<CertificateResponseDto>(
+                return _responseHandler.NotFound<Certificate>(
                     $"Certificate with ID {id} was not found.");
 
-            return _responseHandler.Success(MapToDto(certificate));
+            return _responseHandler.Success(certificate);
         }
 
         
-        public async Task<Response<IReadOnlyList<CertificateResponseDto>>> GetByStudentIdAsync(
+        public async Task<Response<IReadOnlyList<Certificate>>> GetByStudentIdAsync(
             Guid studentId, CancellationToken ct = default)
         {
             
             var studentExists = await _uow.AppUserRepository.AnyAsync(u => u.Id == studentId, ct);
             if (!studentExists)
-                return _responseHandler.NotFound<IReadOnlyList<CertificateResponseDto>>(
+                return _responseHandler.NotFound<IReadOnlyList<Certificate>>(
                     "Student not found.");
 
             var certificates = await _uow.Certificates.GetByStudentIdAsync(studentId, ct);
 
             
-            var result = certificates.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<CertificateResponseDto>>(result);
+            
+            return _responseHandler.Success<IReadOnlyList<Certificate>>(certificates);
         }
 
        
-        public async Task<Response<IReadOnlyList<CertificateResponseDto>>> GetByCourseIdAsync(
-            int courseId, CancellationToken ct = default)
+        public async Task<Response<IReadOnlyList<Certificate>>> GetByCourseIdAsync( int courseId,PaginationParams paginationParams, CancellationToken ct = default)
         {
             
             var courseExists = await _uow.Courses.AnyAsync(c => c.Id == courseId, ct);
             if (!courseExists)
-                return _responseHandler.NotFound<IReadOnlyList<CertificateResponseDto>>(
+                return _responseHandler.NotFound<IReadOnlyList<Certificate>>(
                     "Course not found.");
 
-            var certificates = await _uow.Certificates.GetByCourseIdAsync(courseId, ct);
+            var certificates = await _uow.Certificates.GetByCourseIdAsync(courseId, paginationParams,ct);
 
-            var result = certificates.Select(MapToDto).ToList();
-            return _responseHandler.Success<IReadOnlyList<CertificateResponseDto>>(result);
+            
+            return _responseHandler.Success<IReadOnlyList<Certificate>>(certificates);
         }
 
         
-        public async Task<Response<CertificateResponseDto>> UpdateAsync(
+        public async Task<Response<Certificate>> UpdateAsync(
             int id, UpdateCertificateDto dto, CancellationToken ct = default)
         {
             var certificate = await _uow.Certificates.GetByIdAsync(id, ct);
 
             if (certificate is null)
-                return _responseHandler.NotFound<CertificateResponseDto>(
+                return _responseHandler.NotFound<Certificate>(
                     $"Certificate with ID {id} was not found.");
 
            
@@ -85,7 +84,7 @@ namespace E_Learning.Service.Services.Reviews_Certificates
             
             await _uow.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(MapToDto(certificate));
+            return _responseHandler.Success(certificate);
         }
 
 
@@ -132,32 +131,21 @@ namespace E_Learning.Service.Services.Reviews_Certificates
         // ─────────────────────────────────────────────────────
         // DELETE /api/certificates/{id}
         // ─────────────────────────────────────────────────────
-        public async Task<Response<string>> DeleteAsync(
+        public async Task<Response<Certificate>> DeleteAsync(
             int id, CancellationToken ct = default)
         {
             var certificate = await _uow.Certificates.GetByIdAsync(id, ct);
 
             if (certificate is null)
-                return _responseHandler.NotFound<string>(
+                return _responseHandler.NotFound<Certificate>(
                     $"Certificate with ID {id} was not found.");
 
             _uow.Certificates.Delete(certificate);
             await _uow.SaveChangesAsync(ct);
 
-            return _responseHandler.Deleted<string>();
+            return _responseHandler.Deleted<Certificate>();
         }
 
-        // ─────────────────────────────────────────────────────
-        // Private mapper — entity → DTO
-        // ─────────────────────────────────────────────────────
-        private static CertificateResponseDto MapToDto(Certificate c) => new()
-        {
-            Id = c.Id,
-            StudentId = c.StudentId,
-            CourseId = c.CourseId,
-            CertificateCode = c.CertificateCode,
-            IssuedAt = c.IssuedAt,
-            FileUrl = c.FileUrl,
-        };
+        
     }
 }

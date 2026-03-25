@@ -57,11 +57,9 @@ namespace E_Learning.API.Controllers
         // ─────────────────────────────────────────────
         [HttpGet]
         //[Authorize(Roles = "Instructor,Admin")]
-        public async Task<IActionResult> GetAll(
-            int examId,
-            CancellationToken ct)
+        public async Task<IActionResult> GetAll( int examId,PaginationParams paginationParams,CancellationToken ct)
         {
-            var result = await _attemptServices.GetAllByExamAsync(examId, ct);
+            var result = await _attemptServices.GetAllByExamAsync(examId,paginationParams, ct);
             return StatusCode((int)result.HttpStatusCode, result);
         }
 
