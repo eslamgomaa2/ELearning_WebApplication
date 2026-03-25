@@ -39,11 +39,14 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Reviews_Certi
         }
 
 
-        public async Task<IReadOnlyList<Certificate>> GetByCourseIdAsync(int courseId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Certificate>> GetByCourseIdAsync(int courseId,PaginationParams paginationParams,CancellationToken ct = default)
         {
             return await WithFullIncludes()
                 .Where(c => c.CourseId == courseId)
+                .OrderBy(c => c.Id)
                 .AsNoTracking()
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize)
                 .ToListAsync(ct);
         }
 

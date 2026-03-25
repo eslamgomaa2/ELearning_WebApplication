@@ -6,7 +6,7 @@ namespace E_Learning.Core.Repository
     public interface IExamQuestionRepository : IGenericRepository<ExamQuestion,int>
     {
         
-        Task<IReadOnlyList<ExamQuestion>> GetByExamIdAsync(int examId, CancellationToken ct = default);
+        Task<IReadOnlyList<ExamQuestion>> GetByExamIdAsync(int examId,PaginationParams paginationParams, CancellationToken ct = default);
 
         
         Task<ExamQuestion?> GetByIdWithOptionsAsync(int questionId, CancellationToken ct = default);

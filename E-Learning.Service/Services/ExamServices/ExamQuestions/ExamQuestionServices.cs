@@ -15,66 +15,61 @@ namespace E_Learning.Service.Services.ExamServices.Questions
             _responseHandler = responseHandler;
         }
 
-       
-        public async Task<Response<AddQuestionsResponseDto>> AddManuallyAsync(
-            int examId, AddQuestionsDto dto, CancellationToken ct)
+
+        public async Task<Response<IReadOnlyList<ExamQuestion>>> AddManuallyAsync(
+     int examId, AddQuestionsDto dto, CancellationToken ct)
         {
             // 1. Exam must exist
             var examExists = await _unitOfWork.Exams.AnyAsync(e => e.Id == examId, ct);
             if (!examExists)
-                return _responseHandler.NotFound<AddQuestionsResponseDto>("Exam not found.");
+                return _responseHandler.NotFound<IReadOnlyList<ExamQuestion>>("Exam not found.");
 
             // 2. Start OrderIndex after existing questions
             var startIndex = await _unitOfWork.ExamQuestions.GetMaxOrderIndexAsync(examId, ct);
 
-            var questions = dto.Questions.Select((q, i) => new ExamQuestion
-            {
-                ExamId = examId,
-                Text = q.QuestionText,
-                Type = q.QuestionType,
-                Points = q.Points,
-                IsAIGenerated = false,
-                OrderIndex = q.Order > 0 ? q.Order : startIndex + i + 1,
-                Options = q.Options.Select((o, oi) => new ExamOption
+            var questions = dto.Questions
+                .Select((q, i) => new ExamQuestion
                 {
-                    Text = o.OptionText,
-                    IsCorrect = o.IsCorrect,
-                    OrderIndex = oi + 1,
-                }).ToList()
-            }).ToList();
+                    ExamId = examId,
+                    Text = q.QuestionText,
+                    Type = q.QuestionType,
+                    Points = q.Points,
+                    IsAIGenerated = false,
+                    OrderIndex = q.Order > 0 ? q.Order : startIndex + i + 1,
+                    Options = q.Options
+                        .Select((o, oi) => new ExamOption
+                        {
+                            Text = o.OptionText,
+                            IsCorrect = o.IsCorrect,
+                            OrderIndex = oi + 1,
+                        })
+                        .ToList()
+                })
+                .ToList();
 
             await _unitOfWork.ExamQuestions.AddRangeAsync(questions, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            // 3. Total questions on this exam after insert
-            var total = await _unitOfWork.ExamQuestions
-                .CountAsync(q => q.ExamId == examId, ct);
-
-            return _responseHandler.Created(new AddQuestionsResponseDto
-            {
-                Message = "Questions added successfully",
-                TotalQuestions = total
-            });
+            return _responseHandler.Created<IReadOnlyList<ExamQuestion>>(questions);
         }
 
-      
-        public async Task<Response<IReadOnlyList<QuestionResponseDto>>> GetQuestionsByExamIdAsync(
-            int examId, CancellationToken ct)
+
+        public async Task<Response<IReadOnlyList<ExamQuestion>>> GetQuestionsByExamIdAsync(int examId,PaginationParams paginationParams ,CancellationToken ct)
         {
             var examExists = await _unitOfWork.Exams.AnyAsync(e => e.Id == examId, ct);
             if (!examExists)
-                return _responseHandler.NotFound<IReadOnlyList<QuestionResponseDto>>("Exam not found.");
+                return _responseHandler.NotFound<IReadOnlyList<ExamQuestion>>("Exam not found.");
 
 
-            var questions = await _unitOfWork.ExamQuestions.GetByExamIdAsync(examId, ct);
+            var questions = await _unitOfWork.ExamQuestions.GetByExamIdAsync(examId, paginationParams,ct);
 
-            var result = questions.Select(MapToDto).ToList();
+            
 
-            return _responseHandler.Success<IReadOnlyList<QuestionResponseDto>>(result);
+            return _responseHandler.Success<IReadOnlyList<ExamQuestion>>(questions);
         }
 
 
-        public async Task<Response<QuestionResponseDto>> UpdateAsync(
+        public async Task<Response<ExamQuestion>> UpdateAsync(
      int examId, int questionId, UpdateQuestionDto dto, CancellationToken ct)
         {
             
@@ -83,7 +78,7 @@ namespace E_Learning.Service.Services.ExamServices.Questions
 
             
             if (question is null || question.ExamId != examId)
-                return _responseHandler.NotFound<QuestionResponseDto>("Question not found.");
+                return _responseHandler.NotFound<ExamQuestion>("Question not found.");
 
             
             question.Text = dto.QuestionText;
@@ -132,21 +127,21 @@ namespace E_Learning.Service.Services.ExamServices.Questions
             
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _responseHandler.Success(MapToDto(question));
+            return _responseHandler.Success(question);
         }
 
-        public async Task<Response<string>> DeleteAsync(
+        public async Task<Response<ExamQuestion>> DeleteAsync(
             int examId, int questionId, CancellationToken ct)
         {
             var exists = await _unitOfWork.ExamQuestions.ExistsAsync(examId, questionId, ct);
             if (!exists)
-                return _responseHandler.NotFound<string>("Question not found.");
+                return _responseHandler.NotFound<ExamQuestion>("Question not found.");
 
            var question= await _unitOfWork.ExamQuestions.GetByIdAsync(questionId, ct);
              _unitOfWork.ExamQuestions.Remove(question);
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _responseHandler.Deleted<string>();
+            return _responseHandler.Deleted<ExamQuestion>();
         }
 
       
@@ -174,24 +169,7 @@ namespace E_Learning.Service.Services.ExamServices.Questions
             return _responseHandler.Success("Questions reordered successfully.");
         }
 
-        // ───────────────────────────────────────────────
-        // Private mapper
-        // ───────────────────────────────────────────────
-        private static QuestionResponseDto MapToDto(ExamQuestion q) => new()
-        {
-            Id = q.Id,
-            QuestionText = q.Text,
-            QuestionType = q.Type,
-            Points = q.Points,
-            Order = q.OrderIndex,
-            IsAIGenerated = q.IsAIGenerated,
-            Options = q.Options.Select(o => new OptionResponseDto
-            {
-                Id = o.Id,
-                OptionText = o.Text,
-                IsCorrect = o.IsCorrect,
-                OrderIndex = o.OrderIndex,
-            }).ToList()
-        };
+        
+       
     }
 }

@@ -31,9 +31,9 @@ namespace E_Learning.API.Controllers
         }
 
         [HttpGet("course/{courseId:int}")]
-        public async Task<IActionResult> GetByCourseId(int courseId)
+        public async Task<IActionResult> GetByCourseId(int courseId, [FromQuery] PaginationParams paginationParams)
         {
-            var result = await _certificateServices.GetByCourseIdAsync(courseId);
+            var result = await _certificateServices.GetByCourseIdAsync(courseId,paginationParams);
             return StatusCode((int)result.HttpStatusCode, result);
         }
 

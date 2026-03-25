@@ -28,13 +28,14 @@ namespace E_Learning.Infrastructure.Repositories
                 .FirstOrDefaultAsync(a => a.Id == attemptId, ct);
         }
 
-        public async Task<IReadOnlyList<ExamAttempt>> GetByExamIdAsync( int examId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<ExamAttempt>> GetByExamIdAsync( int examId,PaginationParams paginationParams, CancellationToken ct = default)
         {
             return await _context.ExamAttempts
                 .Where(a => a.ExamId == examId)
                 .Include(a => a.Student)
                 .OrderByDescending(a => a.StartedAt)
                 .AsNoTracking()
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
                 .ToListAsync(ct);
         }
 

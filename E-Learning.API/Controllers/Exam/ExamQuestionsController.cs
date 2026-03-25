@@ -30,9 +30,9 @@ namespace E_Learning.API.Controllers
         
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetByExam(int examId,  CancellationToken ct)
+        public async Task<IActionResult> GetByExam(int examId, [FromQuery] PaginationParams paginationParams,  CancellationToken ct)
         {
-            var result = await _questionServices.GetQuestionsByExamIdAsync(examId, ct);
+            var result = await _questionServices.GetQuestionsByExamIdAsync(examId,paginationParams, ct);
             return StatusCode((int)result.HttpStatusCode, result);
         }
 

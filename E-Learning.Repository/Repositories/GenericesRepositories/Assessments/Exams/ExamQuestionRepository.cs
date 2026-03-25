@@ -15,13 +15,15 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Assessments.E
             _context = context;
         }
 
-        public async Task<IReadOnlyList<ExamQuestion>> GetByExamIdAsync(int examId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<ExamQuestion>> GetByExamIdAsync(int examId,PaginationParams paginationParams, CancellationToken ct = default)
         {
             return await _context.ExamQuestions
                 .Where(q => q.ExamId == examId)
                 .OrderBy(q => q.OrderIndex)
                 .Include(q => q.Options.OrderBy(o => o.OrderIndex))
                 .AsNoTracking()
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize)
                 .ToListAsync(ct);
         }
 
