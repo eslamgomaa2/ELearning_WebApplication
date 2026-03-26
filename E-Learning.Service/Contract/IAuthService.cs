@@ -1,4 +1,5 @@
-﻿using E_Learning.Service.DTOs.Auth;
+﻿using E_Learning.Core.Enums;
+using E_Learning.Service.DTOs.Auth;
 
 namespace E_Learning.Core.Interfaces.Services;
 
@@ -35,4 +36,7 @@ public interface IAuthService
     Task<AuthResponseDto> GoogleLoginAsync(
         GoogleLoginRequestDto dto,
         CancellationToken ct = default);
+
+    Task ResendOtpAsync(string email,
+        OtpPurpose purpose, CancellationToken ct);
 }

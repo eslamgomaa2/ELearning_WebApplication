@@ -13,6 +13,8 @@ public class PaymentMethodConfiguration
         builder.Property(pm => pm.Type)
                .HasMaxLength(20)
                .IsRequired();
+        builder.Property(pm => pm.StripePaymentMethodId)
+       .HasMaxLength(100);
 
         builder.Property(pm => pm.CardLastFour)
                .HasMaxLength(4);

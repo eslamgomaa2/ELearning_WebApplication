@@ -81,6 +81,5 @@ namespace E_Learning.Core.Interfaces.Repositories
         IQueryable<TEntity> QueryNoTracking();
 
 
-        // specification
     }
 }

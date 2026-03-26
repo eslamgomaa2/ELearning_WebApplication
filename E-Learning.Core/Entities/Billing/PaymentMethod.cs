@@ -17,7 +17,7 @@ namespace E_Learning.Core.Entities.Billing
         // ─── Type ────────────────────────────────
         // CreditCard,PayPal
         public string Type { get; set; } = string.Empty;
-
+        public string? StripePaymentMethodId { get; set; }
         // ─── Credit Card Info ────────────────────
         public string? CardLastFour { get; set; }
         public string? CardHolderName { get; set; }

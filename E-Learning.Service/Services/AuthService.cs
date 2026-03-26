@@ -1,5 +1,6 @@
 ﻿using E_learning.Core.Entities.Identity;
 using E_Learning.Core.Entities.Identity;
+using E_Learning.Core.Enums;
 using E_Learning.Core.Exceptions;
 using E_Learning.Core.Interfaces.Services;
 using E_Learning.Core.Repository;
@@ -45,7 +46,7 @@ public class AuthService : IAuthService
         // 1. Check duplicate email
         var existing = await _userManager.FindByEmailAsync(dto.Email);
         if (existing is not null)
-            throw new BadRequestException("Email is already registered");
+            throw new ConflictException("Email is already registered");
 
         // 2. Create ApplicationUser
         var user = new ApplicationUser
@@ -62,7 +63,7 @@ public class AuthService : IAuthService
 
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
-            throw new E_Learning.Core.Exceptions.ValidationException(ToErrorDict(result.Errors));
+            throw new ValidationException(ToErrorDict(result.Errors)); 
 
         // 3. Assign default Student role
         await _userManager.AddToRoleAsync(user, "Student");
@@ -75,7 +76,48 @@ public class AuthService : IAuthService
 
         return "Registration successful. Please check your email for the verification code.";
     }
+    public async Task ResendOtpAsync(
+    string email,
+    OtpPurpose purpose,
+    CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return;
 
+        if (purpose == OtpPurpose.EmailVerification && user.EmailConfirmed)
+            throw new ConflictException("Email is already verified");
+
+      
+        // Rate limit (60 sec)
+        var lastOtp = await _uow.OtpCodes.FirstOrDefaultAsync(
+            o => o.UserId == user.Id && o.Purpose == purpose.ToString(),
+            ct);
+
+        if (lastOtp != null && lastOtp.CreatedAt > DateTime.UtcNow.AddSeconds(-60))
+            throw new BadRequestException("Please wait before requesting another OTP.");
+
+        // Invalidate old OTPs
+        var oldOtps = await _uow.OtpCodes.FindAsync(
+            o => o.UserId == user.Id &&
+                 o.Purpose == purpose.ToString() &&
+                 !o.IsUsed,
+            ct);
+
+        foreach (var otp in oldOtps)
+            otp.IsUsed = true;
+
+        // Generate new OTP
+        var code = GenerateOtp();
+        await SaveOtpAsync(user.Id, code, purpose.ToString(), ct);
+
+        // Send email
+        if (purpose == OtpPurpose.EmailVerification)
+            await _emailService.SendEmailVerificationOtpAsync(user.Email!, code);
+
+        if (purpose == OtpPurpose.ResetPassword)
+            await _emailService.SendPasswordResetOtpAsync(user.Email!, code);
+    }
     // ═══════════════════════════════════════════════════════════
     // VERIFY EMAIL
     // ═══════════════════════════════════════════════════════════
@@ -85,13 +127,11 @@ public class AuthService : IAuthService
     {
         // 1. Find user
         var user = await _userManager.FindByEmailAsync(dto.Email)
-            ?? throw new BadRequestException("Invalid request");
+          ?? throw new NotFoundException("No account found with this email");
 
-        // 2. Check not already verified
         if (user.EmailConfirmed)
-            throw new BadRequestException("Email is already verified");
+            throw new ConflictException("Email is already verified");
 
-        // 3. Validate OTP
         var otp = await _uow.OtpCodes
             .GetValidOtpAsync(user.Id, dto.OtpCode, "EmailVerification", ct)
             ?? throw new BadRequestException("Invalid or expired verification code");
@@ -113,51 +153,41 @@ public class AuthService : IAuthService
     // LOGIN
     // ═══════════════════════════════════════════════════════════
     public async Task<AuthResponseDto> LoginAsync(
-        LoginRequestDto dto,
-        CancellationToken ct = default)
+       LoginRequestDto dto,
+       CancellationToken ct = default)
     {
-        // 1. Find user
         var user = await _userManager.FindByEmailAsync(dto.Email)
             ?? throw new UnauthorizedException("Invalid email or password");
 
-        // 2. Check email verified
         if (!user.EmailConfirmed)
-            throw new ForbiddenException("Please verify your email first");
+            throw new ForbiddenException("Please verify your email before logging in");
 
-        // 3. Check account active
         if (!user.IsActive)
-            throw new ForbiddenException("Your account has been deactivated");
+            throw new ForbiddenException("Your account has been deactivated. Contact support");
 
-        // 4. Verify password
         if (!await _userManager.CheckPasswordAsync(user, dto.Password))
             throw new UnauthorizedException("Invalid email or password");
 
-        // 5. Return tokens
         return await BuildAuthResponseAsync(user, ct);
     }
-
     // ═══════════════════════════════════════════════════════════
     // REFRESH TOKEN
     // ═══════════════════════════════════════════════════════════
     public async Task<AuthResponseDto> RefreshTokenAsync(
-        string refreshToken,
-        CancellationToken ct = default)
+      string refreshToken,
+      CancellationToken ct = default)
     {
-        // 1. Find active session
         var session = await _uow.UserSessions
             .GetActiveSessionByTokenAsync(refreshToken, ct)
-            ?? throw new BadRequestException("Invalid or expired refresh token");
+            ?? throw new UnauthorizedException("Session expired. Please login again");
 
-        // 2. Find user
         var user = await _userManager.FindByIdAsync(session.UserId.ToString())
-            ?? throw new UnauthorizedException("User not found");
+            ?? throw new NotFoundException("User no longer exists");
 
-        // 3. Revoke old session (Rotate token)
         session.IsActive = false;
         _uow.UserSessions.Update(session);
         await _uow.SaveChangesAsync(ct);
 
-        // 4. Return new tokens
         return await BuildAuthResponseAsync(user, ct);
     }
 
@@ -207,19 +237,20 @@ public class AuthService : IAuthService
     {
         // 1. Find user
         var user = await _userManager.FindByEmailAsync(dto.Email)
-            ?? throw new NotFoundException("User not found");
+        ?? throw new NotFoundException("No account found with this email");
+
 
         // 2. Validate OTP
         var otp = await _uow.OtpCodes
             .GetValidOtpAsync(user.Id, dto.OtpCode, "PasswordReset", ct)
-            ?? throw new BadRequestException("Invalid or expired code");
+                   ?? throw new BadRequestException("Invalid or expired reset code");
 
         // 3. Reset password via Identity (generates internal reset token)
         var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
         var result = await _userManager.ResetPasswordAsync(user, resetToken, dto.NewPassword);
 
         if (!result.Succeeded)
-            throw new Core.Exceptions.ValidationException(ToErrorDict(result.Errors));
+            throw new ValidationException(ToErrorDict(result.Errors));
 
         // 4. Mark OTP as used
         otp.IsUsed = true;
@@ -277,12 +308,14 @@ public class AuthService : IAuthService
 
             var result = await _userManager.CreateAsync(user);
             if (!result.Succeeded)
-                throw new Core.Exceptions.ValidationException(ToErrorDict(result.Errors));
+                throw new ValidationException(ToErrorDict(result.Errors));
 
             await _userManager.AddToRoleAsync(user, "Student");
         }
 
-        // 3. Return tokens
+        if (!user.IsActive)
+            throw new ForbiddenException("Your account has been deactivated. Contact support");
+
         return await BuildAuthResponseAsync(user, ct);
     }
 

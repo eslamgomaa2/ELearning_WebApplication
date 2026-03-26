@@ -4,6 +4,7 @@ using E_Learning.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Learning.Repository.Migrations
 {
     [DbContext(typeof(ELearningDbContext))]
-    partial class ELearningDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260314200112_AddStripePaymentMethodId")]
+    partial class AddStripePaymentMethodId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,9 +491,6 @@ namespace E_Learning.Repository.Migrations
                         .HasColumnType("decimal(5,2)")
                         .HasDefaultValue(60m);
 
-                    b.Property<DateTime?>("ScheduledAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("ShowResultsImmediately")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -574,7 +574,7 @@ namespace E_Learning.Repository.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("QuizAttempts", (string)null);
+                    b.ToTable("QuizAttempts");
                 });
 
             modelBuilder.Entity("E_Learning.Core.Entities.Assessments.Quiz.QuizAttemptAnswer", b =>
@@ -1146,9 +1146,6 @@ namespace E_Learning.Repository.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CourseId1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -1198,8 +1195,6 @@ namespace E_Learning.Repository.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
-
-                    b.HasIndex("CourseId1");
 
                     b.HasIndex("TransactionId");
 
@@ -2658,10 +2653,6 @@ namespace E_Learning.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("E_Learning.Core.Entities.Courses.Course", null)
-                        .WithMany("Enrollments")
-                        .HasForeignKey("CourseId1");
-
                     b.HasOne("E_learning.Core.Entities.Identity.ApplicationUser", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
@@ -3042,8 +3033,6 @@ namespace E_Learning.Repository.Migrations
 
             modelBuilder.Entity("E_Learning.Core.Entities.Courses.Course", b =>
                 {
-                    b.Navigation("Enrollments");
-
                     b.Navigation("Sections");
                 });
 
