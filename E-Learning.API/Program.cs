@@ -46,7 +46,7 @@ namespace E_Learning.API
             // For Auditing Interceptor
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<AuditInterceptor>();
-
+            builder.Services.AddHttpClient();
 
 
             // DbContext Default
@@ -188,11 +188,11 @@ namespace E_Learning.API
             });
 
             builder.Services.AddSignalR();
-               
+
             var app = builder.Build();
             app.UseMiddleware<ExceptionMiddleware>();
             // ─── Migration & Seeding ─────────────────────
-             await app.MigrateDatabaseAsync();
+            await app.MigrateDatabaseAsync();
 
             if (app.Environment.IsDevelopment())
             {

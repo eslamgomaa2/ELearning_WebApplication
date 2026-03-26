@@ -21,5 +21,6 @@ namespace E_Learning.Service.DTOs.LiveSessionDto
         public int DurationMinutes { get; set; }
         public string Status { get; set; }
         public string RoomName { get; set; } = string.Empty;
+        public string? ZoomUrl { get; set; }
     }
 }
