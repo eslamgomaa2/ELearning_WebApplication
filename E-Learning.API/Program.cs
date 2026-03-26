@@ -173,15 +173,15 @@ namespace E_Learning.API
                
             var app = builder.Build();
             //Add fake data
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var services = scope.ServiceProvider;
 
-                var context = services.GetRequiredService<ELearningDbContext>();
-                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            //    var context = services.GetRequiredService<ELearningDbContext>();
+            //    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-                await DbSeeder.SeedAsync(context, userManager);
-            }
+            //    await DbSeeder.SeedAsync(context, userManager);
+            //}
             // ─── Migration & Seeding ─────────────────────
              await app.MigrateDatabaseAsync();
 

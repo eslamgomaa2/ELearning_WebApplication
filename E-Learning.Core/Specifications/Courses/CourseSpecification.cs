@@ -16,9 +16,9 @@ namespace E_Learning.Core.Specifications.Courses
                 (!query.StudentId.HasValue || x.Enrollments.Any(e => e.StudentId == query.StudentId)) &&
                 (!query.LevelId.HasValue || x.LevelId == query.LevelId) &&
                 (string.IsNullOrEmpty(query.Subject) || x.Title.Contains(query.Subject)) &&
-                (string.IsNullOrEmpty(query.StageType) || x.Level!.Stage.Name == query.StageType) &&
+                (string.IsNullOrEmpty(query.StageType) || x.Level != null && x.Level.Stage != null && x.Level.Stage.Name == query.StageType) &&
                 (string.IsNullOrEmpty(query.Status) || x.Status == query.Status) &&
-                (string.IsNullOrEmpty(query.Search) || x.Title.Contains(query.Search) || x.Enrollments.Any(x=>x.StudentId.ToString() == query.Search))
+                (string.IsNullOrEmpty(query.Search) || x.Title.ToLower().Contains(query.Search.ToLower()) || x.Enrollments.Any(x=>x.StudentId.ToString() == query.Search))
             )
         {
             AddInclude(x => x.Sections);
@@ -26,6 +26,13 @@ namespace E_Learning.Core.Specifications.Courses
             AddInclude("Enrollments.Student");
             AddInclude(x => x.Level);
             AddInclude(x => x.Instructor);
+
+            Guid? studentId = null;
+
+            if (!string.IsNullOrEmpty(query.Search) && Guid.TryParse(query.Search, out var parsedId))
+            {
+                studentId = parsedId;
+            }
 
             // Sorting
             if (!string.IsNullOrEmpty(query.SortBy))

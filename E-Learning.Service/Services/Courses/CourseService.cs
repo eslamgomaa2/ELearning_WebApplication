@@ -73,21 +73,36 @@ namespace E_Learning.Service.Services.Courses
             return _response.Success(dto);
         }
 
-        public async Task<Response<IReadOnlyList<CourseDto>>> GetCoursesAsync(CourseQuery query,CancellationToken ct = default)
+        public async Task<Response<IReadOnlyList<CourseDto>>> GetCoursesAsync(CancellationToken ct = default)
         {
-            var spec = new CourseSpecification(query);
-            var courses = await _unit.Courses.GetAllWithSpecAsync(spec);
+
+            var courses = await _unit.Courses.GetAllAsync();
 
             if (courses == null)
                 return _response.NotFound<IReadOnlyList<CourseDto>>("Course not found");
 
             var Result = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
-            return  _response.Success(Result);
+            return _response.Success(Result);
         }
 
-        public async Task<Response<string>> UpdateCourseAsync(UpdateCourseDto dto, CancellationToken ct = default)
+        public async Task<Response<IReadOnlyList<CourseDto>>> GetCoursesAsync(CourseQuery query,
+            CancellationToken ct = default)
         {
-            var Course =await _unit.Courses.GetByIdAsync(dto.Id);
+            var spec = new CourseSpecification(query);
+
+            var courses = await _unit.Courses.GetAllWithSpecAsync(spec, ct);
+
+            if (courses == null || !courses.Any())
+                return _response.NotFound<IReadOnlyList<CourseDto>>("No courses found");
+
+            var result = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
+
+            return _response.Success(result);
+        }
+
+        public async Task<Response<string>> UpdateCourseAsync(int id,UpdateCourseDto dto, CancellationToken ct = default)
+        {
+            var Course =await _unit.Courses.GetByIdAsync(id);
             if (Course == null)
                 return _response.NotFound<string>("Course not found");
             

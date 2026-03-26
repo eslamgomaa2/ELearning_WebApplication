@@ -50,5 +50,15 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Courses
 
             return await query.ToListAsync(ct);
         }
+
+        public async Task<int> CountAsync(ISpecifications<Course> spec, CancellationToken ct = default)
+        {
+            IQueryable<Course> query = _context.Set<Course>();
+
+            if (spec.Criteria != null)
+                query = query.Where(spec.Criteria);
+
+            return await query.CountAsync(ct);
+        }
     }
 }
