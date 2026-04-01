@@ -15,27 +15,9 @@ namespace E_Learning.Service.Mapping
         public InstructorProfileMapping()
         {
 
-            CreateMap<UpdateInstructorProfileDto, InstructorProfile>();
 
 
-            CreateMap<InstructorProfile, InstructorProfileResponseDto>()
-
-                .ForMember(dest => dest.profileId,
-                           opt => opt.MapFrom(src => src.Id))
-
-                .ForMember(dest => dest.userId,
-                           opt => opt.MapFrom(src => src.AppUserId))
-
-                .ForMember(dest => dest.FullName,
-                           opt => opt.MapFrom(src => src.AppUser.FullName))
-
-                .ForMember(dest => dest.Email,
-                           opt => opt.MapFrom(src => src.AppUser.Email))
-
-                .ForMember(dest => dest.phoneNumber,
-                           opt => opt.MapFrom(src => src.AppUser.PhoneNumber))
-
-                .ForMember(dest => dest.ProfilePicture, opt => opt.MapFrom(src => src.ProfilePicture));
+         
               
         }
 

@@ -35,7 +35,9 @@ namespace E_learning.API.Extensions
                 // 3. Seed admin + instructor accounts
                 var userManager = services
                     .GetRequiredService<UserManager<ApplicationUser>>();
-                await AdminSeeding.SeedAdminAsync(userManager);
+                
+                await AdminSeeding.SeedAdminAsync(userManager,dbContext);
+
                 await CourseSeeding.SeedCoursesAsync(dbContext, userManager);
                 logger.LogInformation("Default accounts seeded successfully");
 

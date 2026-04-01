@@ -9,7 +9,7 @@ using E_Learning.Core.Enums;
 using E_Learning.Core.Repository;
 using E_Learning.Service.DTOs.LiveSessionDto;
 using E_Learning.Service.Hubs;
-using E_Learning.Service.Services.Profiles; 
+using E_Learning.Service.Services.Profiles.StudentSetting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -73,7 +73,7 @@ if (currentAttendee == null)
 var result = _mapper.Map<AttendeeResponseDto>(currentAttendee);
 
 // 7️⃣ إضافة بيانات الـ Profile إذا موجودة
-var studentProfileResponse = await _studentService.GetStudentProfileByUserId(dto.StudentId);
+var studentProfileResponse = await _studentService.GetStudentProfileByUserIdAsync(dto.StudentId);
 
 if (studentProfileResponse.Data != null)
 {
@@ -97,14 +97,14 @@ return _responseHandler.Success(result);}
             if (attendees == null || !attendees.Any())
                 return _responseHandler.Success<IReadOnlyList<AttendeeResponseDto>>(new List<AttendeeResponseDto>());
 
-            var allStudentsResponse = await _studentService.GetAllStudents();
+            var allStudentsResponse = await _studentService.GetAllStudentsAsync();
             var allStudents = allStudentsResponse.Data;
 
             var result = _mapper.Map<IReadOnlyList<AttendeeResponseDto>>(attendees);
 
             foreach (var attendeeDto in result)
             {
-                var studentInfo = allStudents?.FirstOrDefault(s => s.Id == attendeeDto.Student.Id);
+                var studentInfo = allStudents?.FirstOrDefault(s => s.AppUserId == attendeeDto.Student.Id);
                 if (studentInfo != null)
                 {
                     attendeeDto.Student.ProfilePicture = studentInfo.ProfilePicture;
@@ -133,7 +133,7 @@ var existing = attendees.FirstOrDefault(x => x.StudentId == dto.StudentId && x.L
     await _uow.SaveChangesAsync(ct);
 
     // 4️⃣ جلب بيانات الطالب لتحديث الـDTO
-    var studentProfileResponse = await _studentService.GetStudentProfileByUserId(dto.StudentId);
+    var studentProfileResponse = await _studentService.GetStudentProfileByUserIdAsync(dto.StudentId);
     var result = _mapper.Map<AttendeeResponseDto>(existing);
 
     if (studentProfileResponse.Data != null)

@@ -23,8 +23,8 @@ namespace E_Learning.Core.Base
         {
             return new Response<T>()
             {
-                HttpStatusCode = System.Net.HttpStatusCode.OK,
-                Succeeded = true,
+                HttpStatusCode = System.Net.HttpStatusCode.Forbidden,
+                Succeeded = false,
                 Message = Message == null ? "Access denied." : Message
             };
         }

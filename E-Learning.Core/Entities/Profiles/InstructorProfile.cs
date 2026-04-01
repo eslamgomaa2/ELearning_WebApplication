@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace E_Learning.Core.Entities.Profiles
@@ -11,6 +12,7 @@ namespace E_Learning.Core.Entities.Profiles
     public class InstructorProfile : BaseEntity
     {
         public Guid AppUserId { get; set; }
+        [JsonIgnore]
         public ApplicationUser AppUser { get; set; } = null!;
 
         public string? Bio { get; set; }
@@ -18,6 +20,7 @@ namespace E_Learning.Core.Entities.Profiles
         public string? Location { get; set; }
         public DateOnly? DateOfBirth { get; set; }
         public string? Headline { get; set; }
+        public string? phoneNumber { get; set; }
         public string? About { get; set; }
         public string? Gender { get; set; }
         public decimal TotalEarnings { get; set; } = 0;

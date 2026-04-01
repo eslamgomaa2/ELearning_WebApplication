@@ -26,10 +26,14 @@ public class NotificationSettingConfiguration
         builder.Property(ns => ns.PlatformUpdates)
                .HasDefaultValue(true);
 
-        builder.Property(ns => ns.InAppNotification)
+        builder.Property(ns => ns.NewStudentEnrollmentEmail)
                .HasDefaultValue(true);
 
-        builder.Property(ns => ns.EmailNotification)
+        builder.Property(ns => ns.NewStudentEnrollmentInApp)
+               .HasDefaultValue(true);
+        builder.Property(ns => ns.ExamSubmissionEmail)
+               .HasDefaultValue(true);
+        builder.Property(ns => ns.ExamSubmissionInApp)
                .HasDefaultValue(true);
 
         builder.HasOne(ns => ns.User)

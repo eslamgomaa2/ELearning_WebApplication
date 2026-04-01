@@ -16,14 +16,7 @@ namespace E_Learning.Service.Mapping
         public LiveSessionMappingProfile()
         {
 
-            // 1. Instructor Mapping (المدرب)
-            CreateMap<InstructorProfile, InstructorProfileResponseDto>()
-                .ForMember(dest => dest.profileId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.userId, opt => opt.MapFrom(src => src.AppUserId))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.AppUser.FullName))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.AppUser.Email))
-                .ForMember(dest => dest.phoneNumber, opt => opt.MapFrom(src => src.AppUser.PhoneNumber))
-                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio));
+           
                 //.ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePicture));
 
             CreateMap<ApplicationUser, InstructorResponseDto>()

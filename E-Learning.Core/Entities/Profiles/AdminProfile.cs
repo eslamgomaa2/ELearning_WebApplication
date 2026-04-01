@@ -11,7 +11,6 @@ namespace E_Learning.Core.Entities.Profiles
     public class AdminProfile : BaseEntity
     {
         public Guid AppUserId { get; set; }
-        public ApplicationUser AppUser { get; set; } = null!;
         public string? Bio { get; set; }
         public string? ProfilePicture { get; set; }
         public string? Location { get; set; }
@@ -19,5 +18,7 @@ namespace E_Learning.Core.Entities.Profiles
         public string? Gender { get; set; }
         public bool IsSuperAdmin { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public ApplicationUser AppUser { get; set; } = null!;
     }
 }

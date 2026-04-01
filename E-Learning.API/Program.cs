@@ -2,6 +2,12 @@
 using E_Learning.API.Middleware;
 using E_Learning.API.Services;
 using E_Learning.Service.Hubs;
+using E_Learning.Service.Services.Profiles.AdminSetting;
+using E_Learning.Service.Services.Profiles.FileStorageService;
+using E_Learning.Service.Services.Profiles.GenericProfileSetting;
+using E_Learning.Service.Services.Profiles.GenericProfileSettingServices;
+using E_Learning.Service.Services.Profiles.InstructorSetting;
+using E_Learning.Service.Services.Profiles.StudentSetting;
 using E_Learning.Service.Services.QuizServices;
 using E_Learning.Service.Services.Schedule;
 
@@ -59,7 +65,9 @@ namespace E_Learning.API
             builder.Services.AddTransient<ResponseHandler>();
 
             #region Services 
+            builder.Services.AddScoped<IFileStorage, FileStorage>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IGenericProfileSettingServices, GenericProfileSettingServices>();
             builder.Services.AddSwaggerGen();
             // Services
             builder.Services.AddScoped<IStageService, StageService>();

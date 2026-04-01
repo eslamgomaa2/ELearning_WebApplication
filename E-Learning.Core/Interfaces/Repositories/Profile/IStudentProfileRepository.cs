@@ -10,8 +10,7 @@ namespace E_Learning.Core.Interfaces.Repositories.Profile
     public interface IStudentProfileRepository:IGenericRepository<StudentProfile, Guid> 
 
     {
-        public Task<StudentProfile?> GetStudentProfileWithUserAsync(Guid id);
+        public Task<StudentProfile?> GetStudentProfileAsync(Guid id);
         public Task<StudentProfile?> GetStudentProfileWithUserByUserIdAsync(Guid userId);
-        public Task<IReadOnlyList<StudentProfile>> GetAllStudentProfilesWithUsersAsync();
     }
 }

@@ -10,7 +10,15 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Notifications
     {
         public NotificationSettingsRepository(ELearningDbContext context) : base(context) { }
 
-        public Task<NotificationSetting?> GetByUserIdAsync(Guid userId)
-            => QueryNoTracking().FirstOrDefaultAsync(s => s.UserId == userId);
+
+
+        public Task<NotificationSetting?> GetByUserIdAsync(Guid userId, CancellationToken ct) 
+            => QueryNoTracking().Include(x=>x.User).FirstOrDefaultAsync(s => s.UserId == userId);
+
+
+
+
+
+
     }
 }

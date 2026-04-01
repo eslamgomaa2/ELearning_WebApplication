@@ -46,5 +46,10 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Notifications
         {
             throw new NotImplementedException();
         }
+
+        public  async Task<IReadOnlyList<Notification>> GetNotificationByguid(Guid userId)
+        {
+         return   await QueryNoTracking().Where(n => n.UserId == userId).ToListAsync();
+        }
     }
 }

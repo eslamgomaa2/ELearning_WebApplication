@@ -31,12 +31,12 @@ namespace E_Learning.API.Controllers
 
         // GET /api/notification-settings
         [HttpGet]
-        public async Task<IActionResult> GetMySettings()
+        public async Task<IActionResult> GetMySettings(CancellationToken ct)
         {
             try
             {
                 var userId = GetUserId();
-                var result = await _service.GetMySettingsAsync(userId);
+                var result = await _service.GetMySettingsAsync(userId,ct);
                 var res = _response.Success(result);
                 return StatusCode((int)res.HttpStatusCode, res);
             }

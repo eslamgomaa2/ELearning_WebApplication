@@ -1,90 +1,79 @@
 ﻿using E_Learning.Service.DTOs.Profiles;
 using E_Learning.Service.DTOs.Profiles.Instructor;
-using E_Learning.Service.Services.Profiles;
+using E_Learning.Service.Services.Profiles.GenericProfileSettingServices;
+using E_Learning.Service.Services.Profiles.InstructorSetting;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace E_Learning.API.Controllers.Profiles
+namespace E_Learning.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/settings")]
     [ApiController]
-    [Authorize]
-    public class InstructorController : ControllerBase
+    [Authorize(Roles = "Instructor")]
+    public class InstructorSettingsController : ControllerBase
     {
         private readonly IInstructorService _instructorService;
-        public InstructorController(IInstructorService instructorService)
+        private readonly IGenericProfileSettingServices _genericProfileSetting;
+
+        public InstructorSettingsController(IInstructorService instructorService, IGenericProfileSettingServices genericProfileSetting)
         {
             _instructorService = instructorService;
+            this._genericProfileSetting = genericProfileSetting;
         }
 
+        // ── Hardcoded for testing — replace with JWT claim in production ──────
+        private Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        /* [HttpPost("create")]
-         public async Task<IActionResult> CreateInstructorProfile([FromBody] CreateInstructorProfileDto dto)
-         {
-             var response = await _instructorService.CreateInstructorProfile(dto);
-             return StatusCode((int)response.HttpStatusCode, response);
-         }*/
-        //[HttpPut("{userId}")]
-        [Authorize(Roles = "Instructor")]
-
-        [HttpPut("me")]
-        public async Task<IActionResult> UpdateInstructorProfile( [FromForm] UpdateInstructorProfileDto dto)
-        {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User not logged in");
-
-            if (!Guid.TryParse(userIdString, out var userId))
-                return BadRequest("Invalid user ID");
-            var response = await _instructorService.UpdateInstructorProfile(userId, dto);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }
-
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetInstructorProfileByUserId(Guid userId)
-        {
-            var response = await _instructorService.GetInstructorProfileByUserId(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }
-
-        [HttpGet("exists/{userId}")]
-        public async Task<IActionResult> InstructorProfileExists(Guid userId)
-        {
-            var response = await _instructorService.InstructorProfileExists(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }
         
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllInstructors()
+        [HttpGet]
+        public async Task<IActionResult> GetSettings(  CancellationToken ct )
         {
-            var response = await _instructorService.GetAllInstructors();
-            return StatusCode((int)response.HttpStatusCode, response);
+            var result = await _instructorService.GetAllSettingsAsync(CurrentUserId,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
 
-        [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteInstructorProfile(Guid userId)
+        
+        [HttpPost("profile-picture")]
+        public async Task<IActionResult> UploadProfilePicture(IFormFile file, CancellationToken ct)
         {
-            var response = await _instructorService.DeleteInstructorProfile(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
+            var result = await _genericProfileSetting.UploadProfilePictureAsync(CurrentUserId, file,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
 
-        [Authorize(Roles = "Instructor")]
-        [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        
+        [HttpDelete("profile-picture")]
+        public async Task<IActionResult> DeleteProfilePicture(CancellationToken ct)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User not logged in");
+            var result = await _genericProfileSetting.DeleteProfilePictureAsync(CurrentUserId,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
 
+        
+        [HttpPut("personal-details")]
+        public async Task<IActionResult> UpdatePersonalDetails(
+            [FromBody] UpdateInstructorProfileDto dto, CancellationToken ct)
+        {
+            var result = await _instructorService.UpdatePersonalDetailsAsync(CurrentUserId, dto,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
 
-            if (!Guid.TryParse(userIdString, out var userId))
-                return BadRequest("Invalid user ID");
-            var response = await _instructorService.ChangePasswordAsync(userId, dto);
-            return StatusCode((int)response.HttpStatusCode, response);
+        
+        [HttpPut("notifications")]
+        public async Task<IActionResult> UpdateNotifications(
+            [FromBody] InstructorNotificationSettingsDto dto, CancellationToken ct)
+        {
+            var result = await _instructorService.UpdateInstructorNotificationsAsync(CurrentUserId, dto,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
+
+       
+        [HttpPut("password")]
+        public async Task<IActionResult> UpdatePassword(
+            [FromBody] ChangePasswordDto dto)
+        {
+            var result = await _genericProfileSetting.UpdatePasswordAsync(CurrentUserId, dto);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
     }
 }

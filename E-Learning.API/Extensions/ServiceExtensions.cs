@@ -24,6 +24,7 @@ public static class ServiceExtensions
         // Services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IFileService, FileService>();
 
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<ILiveSessionService, LiveSessionService>();

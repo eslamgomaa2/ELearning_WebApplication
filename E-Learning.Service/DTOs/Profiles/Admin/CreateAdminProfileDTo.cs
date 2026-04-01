@@ -9,14 +9,14 @@ namespace E_Learning.Service.DTOs.Profiles.Admin
 {
     public class CreateAdminProfileDto
     {
-        
-
-        public string FullName { get; set; }
-        public string Email { get; set; }
-        public string phoneNumber { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
-
+        public string? Bio { get; set; }
+        public string? ProfilePicture { get; set; }
+        public string? Location { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
 
     }
+
+
 }
+

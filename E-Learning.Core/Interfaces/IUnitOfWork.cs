@@ -32,6 +32,8 @@ namespace E_Learning.Core.Repository
         #endregion
 
         #region Academic
+        IAcademicSettingRepository AcademicSettings { get; }
+        IGradeRangRepository GradeRanges { get; }
         IStageRepository Stages { get; }
         ILevelRepository Levels { get; }
         #endregion

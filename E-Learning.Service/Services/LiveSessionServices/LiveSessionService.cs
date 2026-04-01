@@ -10,12 +10,12 @@ using E_Learning.Core.Interfaces.Services.Courses;
 using E_Learning.Core.Repository;
 using E_Learning.Service.DTOs.LiveSessionDto;
 using E_Learning.Service.Hubs;
-using E_Learning.Service.Services.Profiles;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using E_Learning.Service.Services.Profiles.InstructorSetting;
 
 namespace E_Learning.Service.Services.LiveSessionServices
 {

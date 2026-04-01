@@ -14,24 +14,18 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Profile
         {
             _context = context;
         }
-        public async Task<StudentProfile?> GetStudentProfileWithUserAsync(Guid id)
+        public async Task<StudentProfile?> GetStudentProfileAsync(Guid id)
         {
-            return await _context.StudentProfiles
-                .Include(s => s.AppUser)
+            return await _context.StudentProfiles.Include(o=>o.AppUser)
                 .FirstOrDefaultAsync(s => s.AppUserId == id);
         }
         public async Task<StudentProfile?> GetStudentProfileWithUserByUserIdAsync(Guid userId)
         {
             return await _context.StudentProfiles
-                .Include(s => s.AppUser)
+                .Include(s => s.AppUser).ThenInclude(o=>o.NotificationSetting)
                 .FirstOrDefaultAsync(s => s.AppUserId == userId);
         }
-        public async Task<IReadOnlyList<StudentProfile>> GetAllStudentProfilesWithUsersAsync()
-        {
-            return await _context.StudentProfiles
-                .Include(s => s.AppUser)
-                .ToListAsync();
-        }
+       
 
 
     }

@@ -16,9 +16,9 @@ namespace E_Learning.Service.Services.Notifications
         private readonly IUnitOfWork _uow;
         public NotificationSettingService(IUnitOfWork uow) => _uow = uow;
 
-        public async Task<NotificationSettingDto> GetMySettingsAsync(Guid userId)
+        public async Task<NotificationSettingDto> GetMySettingsAsync(Guid userId,CancellationToken ct)
         {
-            var s = await _uow.NotificationSettings.GetByUserIdAsync(userId);
+            var s = await _uow.NotificationSettings.GetByUserIdAsync(userId,ct);
             if (s == null)
             {
                 s = new NotificationSetting { UserId = userId };

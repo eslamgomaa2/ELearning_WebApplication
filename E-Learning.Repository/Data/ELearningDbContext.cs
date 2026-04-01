@@ -43,6 +43,9 @@ namespace E_Learning.Repository.Data
         public DbSet<AdminProfile> AdminProfiles { get; set; }
 
         // ─── Academic ────────────────────────────
+
+        public DbSet<AcademicSetting> AcademicSettings { get; set; }
+        public DbSet<GradeRange> GradeRanges { get; set; }
         public DbSet<Stage> Stages { get; set; }
         public DbSet<Level> Levels { get; set; }
 

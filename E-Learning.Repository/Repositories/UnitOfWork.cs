@@ -35,6 +35,7 @@ using E_Learning.Repository.Repositories.GenericesRepositories.Schedule;
 
 
 using Microsoft.EntityFrameworkCore.Storage;
+using E_Learning.Core.Entities.Academic;
 
 namespace E_Learning.Repository.Repositories
 {
@@ -53,6 +54,9 @@ namespace E_Learning.Repository.Repositories
         private IAdminProfileRepository? _adminProfiles;
         private IStageRepository? _stages;
         private ILevelRepository? _levels;
+        private IAcademicSettingRepository? _academicsetting;
+        private IGradeRangRepository? _gradeRang;
+
         private ICourseRepository? _courses;
         private ISectionRepository? _sections;
         private ILessonRepository? _lessons;
@@ -85,6 +89,7 @@ namespace E_Learning.Repository.Repositories
         private ISupportTicketRepository? _supportTickets;
         private ISupportTicketReplyRepository? _supportTicketReplies;
         private ICourseAnalyticsSnapshotRepository? _courseAnalyticsSnapshots;
+        
 
 
         public IUserSessionRepository UserSessions => _userSessions ??= new UserSessionRepository(_context);
@@ -129,6 +134,10 @@ namespace E_Learning.Repository.Repositories
             => _courseAnalyticsSnapshots ??= new CourseAnalyticsSnapshotRepository(_context);
 
         public IAppUserRepository AppUserRepository => _userRepository ??= new AppUserRepository(_context);
+
+        public IAcademicSettingRepository AcademicSettings => _academicsetting??=new AcademicSettingRepository(_context);
+
+        public IGradeRangRepository GradeRanges => _gradeRang??=new GradeRangRepository(_context);
 
         public Task<int> SaveChangesAsync(CancellationToken ct = default)
             => _context.SaveChangesAsync(ct);

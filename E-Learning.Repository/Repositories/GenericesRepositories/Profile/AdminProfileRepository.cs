@@ -17,19 +17,19 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Profile
             _context = context;
         }
 
-        public async Task<AdminProfile?> GetAdminProfileWithUserAsync(Guid id)
+        public async Task<AdminProfile?> GetAdminProfileWithUserAsync(Guid id, CancellationToken ct)
         {
             return await _context.AdminProfiles
                 .Include(a => a.AppUser)
                 .FirstOrDefaultAsync(a => a.AppUserId == id);
         }
-        public async Task<AdminProfile?> GetAdminProfileWithUserByUserIdAsync(Guid userId)
+        public async Task<AdminProfile?> GetAdminProfileWithUserByUserIdAsync(Guid userId, CancellationToken ct)
         {
             return await _context.AdminProfiles
                 .Include(a => a.AppUser)
                 .FirstOrDefaultAsync(a => a.AppUserId == userId);
         }
-        public async Task<IReadOnlyList<AdminProfile>> GetAllAdminProfilesWithUsersAsync()
+        public async Task<IReadOnlyList<AdminProfile>> GetAllAdminProfilesWithUsersAsync(CancellationToken ct)
         {
             return await _context.AdminProfiles
                 .Include(a => a.AppUser)
@@ -37,6 +37,6 @@ namespace E_Learning.Repository.Repositories.GenericesRepositories.Profile
 
         }
 
-    }
+      }
 }
    

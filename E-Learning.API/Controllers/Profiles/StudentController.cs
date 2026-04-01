@@ -1,90 +1,96 @@
 ﻿using E_Learning.Service.DTOs.Profiles;
-using E_Learning.Service.DTOs.Profiles.Admin;
-using E_Learning.Service.DTOs.Profiles.Instructor;
 using E_Learning.Service.DTOs.Profiles.Student;
-using E_Learning.Service.Services.Profiles;
+using E_Learning.Service.Services.Profiles.GenericProfileSettingServices;
+using E_Learning.Service.Services.Profiles.StudentSetting;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace E_Learning.API.Controllers.Profiles
+namespace E_Learning.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/student/settings")]
     [ApiController]
-    [Authorize]
-    public class StudentController : ControllerBase
+    [Authorize(Roles = "Student")]
+    public class StudentSettingsController : ControllerBase
     {
         private readonly IStudentService _studentService;
-        public StudentController(IStudentService studentService)
+        private readonly IGenericProfileSettingServices _genericProfileSetting;
+
+        public StudentSettingsController(IStudentService studentService, IGenericProfileSettingServices genericProfileSetting)
         {
             _studentService = studentService;
+            _genericProfileSetting = genericProfileSetting;
         }
 
-        /* [HttpPost("create")]
-         public async Task<IActionResult> CreateInstructorProfile([FromForm] UpdateStudentProfileDto dto)
-         {
-             var response = await _studentService.CreateStudentProfile(dto);
-             return StatusCode((int)response.HttpStatusCode, response);
-         }*/
-        [Authorize(Roles = "Student")]
-        //[HttpPut("{userId}")]
-        [HttpPut("me")]
-        public async Task<IActionResult> UpdateStudentProfile( [FromForm] UpdateStudentProfileDto dto)
-        {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User not logged in");
+        // ── Hardcoded for testing — replace with JWT claim ────────────────────
+        private Guid CurrentUserId =>  Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-   
-            if (!Guid.TryParse(userIdString, out var userId))
-                return BadRequest("Invalid user ID");
-            var response = await _studentService.UpdateStudentProfile(userId, dto);
-            return StatusCode((int)response.HttpStatusCode, response);
+        
+        [HttpGet]
+        public async Task<IActionResult> GetAllSettings()
+        {
+            var result = await _studentService.GetAllSettingsAsync(CurrentUserId);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetStudentProfileByUserId(Guid userId)
+        
+        [HttpPut("profile")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateProfile(
+            [FromForm] UpdateStudentProfileDto dto, CancellationToken ct)
         {
-            var response = await _studentService.GetStudentProfileByUserId(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
+            var result = await _studentService.UpdateStudentInformationAsync(CurrentUserId, dto, ct);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
 
-        /*[HttpGet("exists/{userId}")]
-        public async Task<IActionResult> StudentProfileExists(Guid userId)
+        
+        [HttpGet("email-security")]
+        public async Task<IActionResult> GetEmailSecurity()
         {
-            var response = await _studentService.StudentProfileExists(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
-        }*/
-
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllStudents()
-        {
-            var response = await _studentService.GetAllStudents();
-            return StatusCode((int)response.HttpStatusCode, response);
+            var result = await _studentService.GetEmailSecurityAsync(CurrentUserId);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
 
-        [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteStudentProfile(Guid userId)
+  
+        [HttpPut("notifications")]
+        public async Task<IActionResult> UpdateNotificationsSettings(
+            [FromBody] StudentNotificationSettingDto dto,CancellationToken ct)
         {
-            var response = await _studentService.DeleteStudentProfile(userId);
-            return StatusCode((int)response.HttpStatusCode, response);
+            var result = await _studentService.UpdateNotificationSettingAsync(CurrentUserId, dto,ct);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
-        [Authorize(Roles = "Student")]
-        [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+
+        
+        [HttpPut("privacy")]
+        public async Task<IActionResult> UpdatePrivacy(
+            [FromBody] PrivacySettingsDto dto)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString))
-                return Unauthorized("User not logged in");
+            var result = await _studentService.UpdatePrivacySettingsAsync(CurrentUserId, dto);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
 
+        [HttpPut("learning-preferences")]
+        public async Task<IActionResult> UpdateLearningPreferences(
+            [FromBody] LearningPrefrancesDto dto)
+        {
+            var result = await _studentService.UpdateLearningPrefrancesAsync(CurrentUserId, dto);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
 
-            if (!Guid.TryParse(userIdString, out var userId))
-                return BadRequest("Invalid user ID");
-            var response = await _studentService.ChangePasswordAsync(userId, dto);
-            return StatusCode((int)response.HttpStatusCode, response);
+        
+        [HttpPost("export")]
+        public async Task<IActionResult> RequestDataExport()
+        {
+            var result = await _studentService.RequestDataExportAsync(CurrentUserId);
+            return StatusCode((int)result.HttpStatusCode, result);
+        }
+
+        [HttpPut("password")]
+        public async Task<IActionResult> UpdatePassword(
+           [FromBody] ChangePasswordDto dto)
+        {
+            var result = await _genericProfileSetting.UpdatePasswordAsync(CurrentUserId, dto);
+            return StatusCode((int)result.HttpStatusCode, result);
         }
     }
 }
