@@ -90,7 +90,8 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> UpdatePassword(
          [FromBody] ChangePasswordDto dto)
     {
-        var result = await _genericProfileSetting.UpdatePasswordAsync(CurrentUserId, dto);
+        var UserId = User.GetUserId();
+        var result = await _genericProfileSetting.UpdatePasswordAsync(UserId, dto);
         return StatusCode((int)result.HttpStatusCode, result);
     }
 }
