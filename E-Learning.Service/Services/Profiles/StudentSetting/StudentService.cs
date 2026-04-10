@@ -38,9 +38,7 @@ namespace E_Learning.Service.Services.Profiles.StudentSetting
             return _responseHandler.Success(profile);
         }
 
-        public async Task<Response<StudentProfile>> UpdateStudentInformationAsync(
-            Guid userId,
-            UpdateStudentProfileDto dto, CancellationToken ct)
+        public async Task<Response<StudentProfile>> UpdateStudentInformationAsync( Guid userId,  UpdateStudentProfileDto dto, CancellationToken ct)
         {
             var profile = await _uow.StudentProfiles.GetStudentProfileWithUserByUserIdAsync(userId);
 
@@ -51,23 +49,12 @@ namespace E_Learning.Service.Services.Profiles.StudentSetting
             if (!string.IsNullOrWhiteSpace(dto.FullName))
                 profile.AppUser.FullName = dto.FullName;
 
-            if (!string.IsNullOrWhiteSpace(dto.Email)
-                && !string.Equals(profile.AppUser.Email, dto.Email, StringComparison.OrdinalIgnoreCase))
-            {
-                var emailTaken = await _userManager.FindByEmailAsync(dto.Email);
-                if (emailTaken is not null && emailTaken.Id != userId)
-                    return _responseHandler.BadRequest<StudentProfile>(
-                        $"Email '{dto.Email}' is already in use.");
-
-                profile.AppUser.Email = dto.Email;
-                profile.AppUser.UserName = dto.Email;
-            }
+           
 
             if (!string.IsNullOrWhiteSpace(dto.phoneNumber))
                 profile.AppUser.PhoneNumber = dto.phoneNumber;
 
-            if (!string.IsNullOrWhiteSpace(dto.location))
-                profile.Location = dto.location;
+           
 
             if (dto.DateOfBirth.HasValue)
                 profile.DateOfBirth = dto.DateOfBirth.Value;

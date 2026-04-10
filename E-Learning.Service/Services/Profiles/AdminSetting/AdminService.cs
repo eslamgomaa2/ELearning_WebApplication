@@ -1,11 +1,14 @@
-﻿using E_learning.Core.Entities.Identity;
+﻿
+
+using E_learning.Core.Entities.Identity;
 using E_Learning.Core.Base;
 using E_Learning.Core.Entities.Academic;
 using E_Learning.Core.Entities.Notifications;
 using E_Learning.Core.Entities.Profiles;
+using E_Learning.Core.Enums;
 using E_Learning.Core.Repository;
+using E_Learning.Service.Contract;
 using E_Learning.Service.DTOs.Profiles.Admin;
-using E_Learning.Service.DTOs.Profiles.Student;
 using E_Learning.Service.Services.Profiles.AdminSetting;
 using E_Learning.Service.Services.Profiles.FileStorageService;
 using Microsoft.AspNetCore.Identity;
@@ -16,17 +19,20 @@ public class AdminService : IAdminService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IFileStorage _fileStorage;
     private readonly ResponseHandler _responseHandler;
+    private readonly IEmailService _emailService;
 
     public AdminService(
         IUnitOfWork uow,
         UserManager<ApplicationUser> userManager,
         IFileStorage fileStorage,
-        ResponseHandler responseHandler)
+        ResponseHandler responseHandler,
+        IEmailService emailService)
     {
         _uow = uow;
         _userManager = userManager;
         _fileStorage = fileStorage;
         _responseHandler = responseHandler;
+        _emailService = emailService;
     }
 
     public async Task<Response<NotificationSetting>> GetAdminNotificationSettingsAsync(Guid userId, CancellationToken ct = default)
@@ -58,23 +64,10 @@ public class AdminService : IAdminService
 
         // ── AppUser fields
         if (!string.IsNullOrWhiteSpace(dto.FullName)) profile.AppUser.FullName = dto.FullName;
-        if (!string.IsNullOrWhiteSpace(dto.Email) && !string.Equals(profile.AppUser.Email, dto.Email, StringComparison.OrdinalIgnoreCase))
-        {
-            var emailTaken = await _userManager.FindByEmailAsync(dto.Email);
-            if (emailTaken is not null && emailTaken.Id != userId)
-                return _responseHandler.BadRequest<AdminProfile>($"Email '{dto.Email}' is already in use.");
-
-            profile.AppUser.Email = dto.Email;
-            profile.AppUser.UserName = dto.Email;
-        }
+       
         if (!string.IsNullOrWhiteSpace(dto.PhoneNumber)) profile.AppUser.PhoneNumber = dto.PhoneNumber;
         profile.AppUser.UpdatedAt = DateTime.UtcNow;
 
-        // ── AdminProfile fields
-        if (!string.IsNullOrWhiteSpace(dto.Location)) profile.Location = dto.Location;
-        if (!string.IsNullOrWhiteSpace(dto.Bio)) profile.Bio = dto.Bio;
-        if (!string.IsNullOrWhiteSpace(dto.Gender)) profile.Gender = dto.Gender;
-        if (dto.DateOfBirth.HasValue) profile.DateOfBirth = dto.DateOfBirth;
 
         // ── Profile picture
         if (dto.ProfilePicture is not null && dto.ProfilePicture.Length > 0)
@@ -115,7 +108,56 @@ public class AdminService : IAdminService
 
         return _responseHandler.Success(settings);
     }
+    public async Task<Response<ApplicationUser>> ApproveInstructorAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+           if(user is null)
+            _responseHandler.NotFound<ApplicationUser>("User not found");
 
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains("Instructor"))
+          _responseHandler.Forbidden<ApplicationUser>("User is not an instructor");
+
+        user.IsApproved = true;
+        user.InstructorStatus = InstructorStatus.Approved;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
+        await _emailService.SendInstructorApprovedAsync(user.Email!, user.FullName);
+       return _responseHandler.Success(user);
+    }
+
+    public async Task<Response<ApplicationUser>> RejectInstructorAsync(Guid userId, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user is null)
+            _responseHandler.NotFound<ApplicationUser>("User not found");
+
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains("Instructor"))
+            _responseHandler.Forbidden<ApplicationUser>("User is not an instructor");
+
+        user.IsApproved = false;
+        user.InstructorStatus = InstructorStatus.Rejected;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
+        await _emailService.SendInstructorRejectedAsync(user.Email!, user.FullName);
+        return _responseHandler.Success(user);
+    }
+
+    public async Task<Response<IEnumerable<ApplicationUser>>> GetPendingInstructorsAsync( CancellationToken ct = default)
+    {
+        
+        var instructors = await _userManager.GetUsersInRoleAsync("Instructor");
+
+        var pendingInstructors = instructors
+            .Where(u => u.InstructorStatus == InstructorStatus.Pending)
+            .ToList();
+
+        return _responseHandler.Success<IEnumerable<ApplicationUser>>(pendingInstructors);
+    }
     public async Task<Response<NotificationSetting>> UpdateAdminNotification_PrefrancesSettingAsync(Guid userId, AdminNotificationPrefrancesDto dto, CancellationToken ct = default)
     {
         var setting = await _uow.NotificationSettings.GetByUserIdAsync(userId, ct);

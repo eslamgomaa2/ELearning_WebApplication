@@ -59,9 +59,7 @@ namespace E_Learning.Service.Services.Profiles.InstructorSetting
             if (!string.IsNullOrWhiteSpace(dto.FullName))
                 profile.AppUser.FullName = dto.FullName;
 
-            if (!string.IsNullOrWhiteSpace(dto.Email))
-                profile.AppUser.Email = dto.Email;
-
+           
             if (!string.IsNullOrWhiteSpace(dto.phoneNumber))
                 profile.phoneNumber = dto.phoneNumber;
 

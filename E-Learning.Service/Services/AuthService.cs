@@ -1,5 +1,6 @@
 ﻿using E_learning.Core.Entities.Identity;
 using E_Learning.Core.Entities.Identity;
+using E_Learning.Core.Entities.Profiles;
 using E_Learning.Core.Enums;
 using E_Learning.Core.Exceptions;
 using E_Learning.Core.Interfaces.Services;
@@ -39,43 +40,54 @@ public class AuthService : IAuthService
     // ═══════════════════════════════════════════════════════════
     // REGISTER
     // ═══════════════════════════════════════════════════════════
-    public async Task<string> RegisterAsync(
-        RegisterRequestDto dto,
-        CancellationToken ct = default)
+   
+      public async Task<string> RegisterAsync(
+    RegisterRequestDto dto,
+    CancellationToken ct = default)
     {
-        // 1. Check duplicate email
+        // 1. Validate Role
+        var role = dto.Role?.Trim().ToLower();
+        if (role is not ("Student" or "Instructor"))
+            throw new Exception("Invalid role");
+
+        // 2. Check duplicate email
         var existing = await _userManager.FindByEmailAsync(dto.Email);
         if (existing is not null)
             throw new ConflictException("Email is already registered");
 
-        // 2. Create ApplicationUser
-        var user = new ApplicationUser
-        {
-            FullName = dto.FullName,
-            UserName = dto.Email,
-            Email = dto.Email,
-            MemberSince = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsActive = true,
-            Language = "en",
-            TimeZone = "UTC"
-        };
+        // 3. Create user
+        var user = CreateUser(dto, role);
 
+        // 4. Create in Identity
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
-            throw new ValidationException(ToErrorDict(result.Errors)); 
+            throw new ValidationException(ToErrorDict(result.Errors));
 
-        // 3. Assign default Student role
-        await _userManager.AddToRoleAsync(user, "Student");
+        // 5. Assign role
+        await _userManager.AddToRoleAsync(user, role);
 
-        // 4. Generate OTP and send verification email
+        if (role is "instructor") {
+            var newinstructor = new InstructorProfile
+            {
+                AppUserId = user.Id,
+            };
+          await  _uow.InstructorProfiles.AddAsync(newinstructor);
+            }
+        var newstudent = new StudentProfile
+        {
+            AppUserId = user.Id,
+        };
+        await _uow.StudentProfiles.AddAsync(newstudent);
+
         var otp = GenerateOtp();
         await SaveOtpAsync(user.Id, otp, "EmailVerification", ct);
-        //await _emailService.SendEmailVerificationOtpAsync(user.UserName, otp);
-        await _emailService.SendEmailVerificationOtpAsync(user.Email!, otp);
+
+        // 6. Send OTP
+        await _emailService.SendEmailVerificationOtpAsync(user.Email!,otp );
 
         return "Registration successful. Please check your email for the verification code.";
     }
+    
     public async Task ResendOtpAsync(
     string email,
     OtpPurpose purpose,
@@ -161,6 +173,15 @@ public class AuthService : IAuthService
 
         if (!user.EmailConfirmed)
             throw new ForbiddenException("Please verify your email before logging in");
+
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Contains("Instructor") && user.InstructorStatus != InstructorStatus.Approved)
+        {
+            var msg = user.InstructorStatus == InstructorStatus.Rejected
+                ? "Your instructor application has been rejected. Contact support."
+                : "Your instructor account is pending admin approval.";
+            throw new ForbiddenException(msg);
+        }
 
         if (!user.IsActive)
             throw new ForbiddenException("Your account has been deactivated. Contact support");
@@ -435,10 +456,24 @@ public class AuthService : IAuthService
         await _uow.OtpCodes.AddAsync(otp, ct);
         await _uow.SaveChangesAsync(ct);
     }
-
-    /// <summary>
-    /// Converts Identity errors to Dictionary for ValidationException
-    /// </summary>
+    private ApplicationUser CreateUser(RegisterRequestDto dto, string role)
+    {
+        return new ApplicationUser
+        {
+            FullName = dto.FullName,
+            UserName = dto.Email,
+            Email = dto.Email,
+            MemberSince = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            IsActive = true,
+            IsApproved = role == "Student", 
+            InstructorStatus = role == "Instructor"
+                ? InstructorStatus.Pending
+                : null,
+            Language = "en",
+            TimeZone = "UTC"
+        };
+    }
     private static Dictionary<string, string[]> ToErrorDict(
         IEnumerable<IdentityError> errors)
         => errors
