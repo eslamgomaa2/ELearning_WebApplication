@@ -1,4 +1,5 @@
 ﻿using E_Learning.Core.Entities.Notifications;
+using E_Learning.Core.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace E_learning.Core.Entities.Identity
@@ -22,6 +23,10 @@ namespace E_learning.Core.Entities.Identity
         // ─── Privacy ─────────────────────────────
         public bool ProfileVisibility { get; set; } = true;
         public bool ShowProgressToOthers { get; set; } = true;
+
+        
+        public bool IsApproved { get; set; } = true;  // false for instructors until admin approves
+        public InstructorStatus? InstructorStatus { get; set; }  
 
         // ─── NavProp ─────────────────────────────
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();

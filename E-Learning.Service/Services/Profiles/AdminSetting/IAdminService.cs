@@ -23,5 +23,8 @@ namespace E_Learning.Service.Services.Profiles.AdminSetting
         Task<Response<ApplicationUser>> UpdateGeneralSettingAsync(Guid userId, GeneralSettingDto dto, CancellationToken ct = default);
         Task<Response<AcademicSetting>> UpdateAcademicSettingAsync(Guid userId, AcademicSettingDto dto, CancellationToken ct = default);
         Task<Response<AdminProfile>> GetAdminProfileByUserId(Guid userId, CancellationToken ct = default);
+        Task<Response<ApplicationUser>> ApproveInstructorAsync(Guid userId, CancellationToken ct = default);
+        Task<Response<ApplicationUser>> RejectInstructorAsync(Guid userId, CancellationToken ct = default);
+        Task<Response<IEnumerable<ApplicationUser>>> GetPendingInstructorsAsync(CancellationToken ct = default);
     }
 }
